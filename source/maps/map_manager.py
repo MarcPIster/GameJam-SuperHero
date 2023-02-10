@@ -5,20 +5,17 @@ class MapManager:
     def __init__(self):
         self.tile_map = None
 
-    def get_level_one(self):
-        return self.load_level("./assets/map/level1.json")
-
-    def get_level_two(self):
-        return self.load_level("./assets/map/level2.json")
-
-    def get_level_three(self):
-        return self.load_level("./assets/map/level3.json")
-
-    def load_level(self, path):
-        map_name = path
+    def load_level(self, level):
+        map_name = f"./assets/map/level{level}.json"
 
         layer_options = {
             "Platforms": {
+                "use_spatial_hash": True,
+            },
+            "Moving Platforms": {
+                "use_spatial_hash": False,
+            },
+            "Coins": {
                 "use_spatial_hash": True,
             },
         }
