@@ -1,8 +1,27 @@
 import arcade
-import arcade.gui
-from source.game import MyGame
 
-class StartWindow(arcade.View):
+
+class PauseManager:
+    def __init__(self):
+        print("pause manager")
+        self.pause = False
+        self.pause_view = None
+
+
+    def on_key_press(self, key, modifiers):
+        if key == arcade.key.ESCAPE:
+            print("escape")
+            if self.pause:
+                self.pause = False
+                self.pause_view = None
+            else:
+                self.pause = True
+                pause_view = PauseWindow()
+                self.pause_view = pause_view
+                self.pause_view.activate()
+
+
+class PauseWindow(arcade.View):
     def __init__(self):
         super().__init__()
 
@@ -18,9 +37,9 @@ class StartWindow(arcade.View):
         self.v_box = arcade.gui.UIBoxLayout()
 
         # Create the buttons
-        start_button = arcade.gui.UIFlatButton(text="Start Game", width=200)
+        start_button = arcade.gui.UIFlatButton(text="Resume Game", width=200)
         self.v_box.add(start_button.with_space_around(bottom=20))
-        start_button.on_click = self.on_click_start
+        start_button.on_click = self.on_click_resume
 
         settings_button = arcade.gui.UIFlatButton(text="Settings", width=200)
         self.v_box.add(settings_button.with_space_around(bottom=20))
@@ -41,12 +60,8 @@ class StartWindow(arcade.View):
                 child=self.v_box)
         )
 
-    def on_click_start(self, event):
-        game = MyGame()
-        game.setup()
-        self.deactivate()
-        self.window.show_view(game)
-        print("Start:", event)
+    def on_click_resume(self, event):
+        pass
 
     def on_click_settings(self, event):
         print("Settings:", event)
@@ -57,6 +72,10 @@ class StartWindow(arcade.View):
 
     def deactivate(self):
         self.manager.disable()
+
+    def activate(self):
+        self.manager.enable()
+        self.window.show_view(self)
 
     def on_draw(self):
         self.clear()

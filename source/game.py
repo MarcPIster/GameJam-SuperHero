@@ -1,6 +1,7 @@
 import arcade
 from source.josis_test_player import Player
 from source.maps.level_one import MapOne
+from source.menus.pause_screen import PauseManager
 
 class MyGame(arcade.View):
     """
@@ -12,8 +13,8 @@ class MyGame(arcade.View):
         self.physics_engine = None
         self.map = None
         self.player = None
+        self.pause_manager = None
         arcade.set_background_color(arcade.csscolor.CORNFLOWER_BLUE)
-        print("test")
 
     def on_show_view(self):
         """ This is run once when we switch to this view """
@@ -25,6 +26,7 @@ class MyGame(arcade.View):
         self.map.setup()
         self.player = Player()
         self.player.physics_engine = arcade.PhysicsEngineSimple(self.player.player_sprite, self.map.sprite_list)
+        self.pause_manager = PauseManager()
 
     def on_draw(self):
         """ Render the screen. """
@@ -38,6 +40,7 @@ class MyGame(arcade.View):
 
     def on_key_release(self, key, modifiers):
         self.player.on_key_release(key, modifiers)
+        self.pause_manager.on_key_press(key, modifiers)
 
     def on_update(self, delta_time):
         self.player.on_update(delta_time)
