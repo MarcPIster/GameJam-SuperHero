@@ -1,11 +1,11 @@
 import arcade
 
 
-class MapOne:
+class MapManager:
     def __init__(self):
         self.sprite_list = arcade.SpriteList(use_spatial_hash=True)
 
-    def setup(self):
+    def level_one(self):
         for x in range(0, 1250, 64):
             wall = arcade.Sprite(":resources:images/tiles/grassMid.png", 0.5)
             wall.center_x = x

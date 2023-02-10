@@ -3,7 +3,7 @@ Platformer Game
 """
 import arcade
 from source.josis_test_player import Player
-from source.maps.level_one import MapOne
+from source.maps.level_one import MapManager
 
 # Constants
 SCREEN_WIDTH = 1000
@@ -22,22 +22,29 @@ class MyGame(arcade.Window):
         self.physics_engine = None
         self.map = None
         self.player = None
+        self.scene = None
         arcade.set_background_color(arcade.csscolor.CORNFLOWER_BLUE)
 
     def setup(self):
         """ Set up the game here. Call this function to restart the game. """
-        self.map = MapOne()
-        self.map.setup()
+        self.scene = arcade.Scene()
+        self.scene.add_sprite_list("Player")
+
+        map = MapManager()
+        map.level_one()
+        self.scene.add_sprite_list("Walls", use_spatial_hash=True, sprite_list=map.sprite_list)
+
         self.player = Player()
-        self.player.physics_engine = arcade.PhysicsEngineSimple(self.player.player_sprite, self.map.sprite_list)
+        self.scene.add_sprite("Player", self.player.player_sprite)
+
+        self.player.physics_engine = arcade.PhysicsEngineSimple(self.player.player_sprite, map.sprite_list)
 
     def on_draw(self):
         """ Render the screen. """
 
-        arcade.start_render()
+        self.clear()
 
-        self.player.player_sprite.draw()
-        self.map.sprite_list.draw()
+        self.scene.draw()
         # Code to draw the screen goes here
 
     def on_key_press(self, key, modifiers):
