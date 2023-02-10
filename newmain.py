@@ -1,13 +1,14 @@
 import arcade
 from source.menus.start_screen import StartWindow
 
+
 # Constants
 SCREEN_WIDTH = 1000
 SCREEN_HEIGHT = 650
 SCREEN_TITLE = "Smash Covid"
 
 
-class MyGame(arcade.View):
+class SmashCovid(arcade.View):
 
     def __init__(self):
         # Call the parent class and set up the window
@@ -21,16 +22,6 @@ class MyGame(arcade.View):
         """ Render the screen. """
         arcade.start_render()
         # Code to draw the screen goes here
-
-    def on_key_press(self, key, modifiers):
-        self.player.on_key_press(key, modifiers)
-
-    def on_key_release(self, key, modifiers):
-        self.player.on_key_release(key, modifiers)
-
-    def on_update(self, delta_time):
-        self.player.on_update(delta_time)
-
 
 def main():
     """ Main method """

@@ -1,6 +1,6 @@
 import arcade
 import arcade.gui
-
+from source.game import MyGame
 
 class StartWindow(arcade.View):
     def __init__(self):
@@ -42,6 +42,9 @@ class StartWindow(arcade.View):
         )
 
     def on_click_start(self, event):
+        game = MyGame()
+        game.setup()
+        self.window.show_view(game)
         print("Start:", event)
 
     def on_click_settings(self, event):
