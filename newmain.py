@@ -23,6 +23,9 @@ class SmashCovid(arcade.View):
         arcade.start_render()
         # Code to draw the screen goes here
 
+
+
+
 def main():
     """ Main method """
     window = arcade.Window(SCREEN_WIDTH, SCREEN_HEIGHT, SCREEN_TITLE)

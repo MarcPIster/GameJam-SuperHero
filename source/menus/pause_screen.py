@@ -3,27 +3,20 @@ import arcade
 
 class PauseManager:
     def __init__(self):
-        print("pause manager")
-        self.pause = False
         self.pause_view = None
 
 
-    def on_key_press(self, key, modifiers):
+    def on_key_press(self, key, current_view):
         if key == arcade.key.ESCAPE:
-            print("escape")
-            if self.pause:
-                self.pause = False
-                self.pause_view = None
-            else:
-                self.pause = True
-                pause_view = PauseWindow()
-                self.pause_view = pause_view
-                self.pause_view.activate()
+            pause_view = PauseWindow(current_view)
+            self.pause_view = pause_view
+            self.pause_view.activate()
 
 
 class PauseWindow(arcade.View):
-    def __init__(self):
+    def __init__(self, game_view):
         super().__init__()
+        self.game_view = game_view
 
         # --- Required for all code that uses UI element,
         # a UIManager to handle the UI.
@@ -61,7 +54,9 @@ class PauseWindow(arcade.View):
         )
 
     def on_click_resume(self, event):
-        pass
+        arcade.set_background_color(arcade.color.CORNFLOWER_BLUE)
+        self.window.show_view(self.game_view)
+        print("Resume:", event)
 
     def on_click_settings(self, event):
         print("Settings:", event)

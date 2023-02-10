@@ -40,7 +40,7 @@ class MyGame(arcade.View):
 
     def on_key_release(self, key, modifiers):
         self.player.on_key_release(key, modifiers)
-        self.pause_manager.on_key_press(key, modifiers)
+        self.pause_manager.on_key_press(key, self)
 
     def on_update(self, delta_time):
         self.player.on_update(delta_time)
