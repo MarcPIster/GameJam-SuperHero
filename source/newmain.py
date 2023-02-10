@@ -1,9 +1,5 @@
-"""
-Platformer Game
-"""
 import arcade
-from source.josis_test_player import Player
-from source.maps.level_one import MapOne
+from source.menus.start_screen import StartWindow
 
 # Constants
 SCREEN_WIDTH = 1000
@@ -11,33 +7,19 @@ SCREEN_HEIGHT = 650
 SCREEN_TITLE = "Smash Covid"
 
 
-class MyGame(arcade.Window):
-    """
-    Main application class.
-    """
+class MyGame(arcade.View):
 
     def __init__(self):
         # Call the parent class and set up the window
-        super().__init__(SCREEN_WIDTH, SCREEN_HEIGHT, SCREEN_TITLE)
-        self.physics_engine = None
-        self.map = None
-        self.player = None
+        super().__init__()
         arcade.set_background_color(arcade.csscolor.CORNFLOWER_BLUE)
 
     def setup(self):
         """ Set up the game here. Call this function to restart the game. """
-        self.map = MapOne()
-        self.map.setup()
-        self.player = Player()
-        self.player.physics_engine = arcade.PhysicsEngineSimple(self.player.player_sprite, self.map.sprite_list)
 
     def on_draw(self):
         """ Render the screen. """
-
         arcade.start_render()
-
-        self.player.player_sprite.draw()
-        self.map.sprite_list.draw()
         # Code to draw the screen goes here
 
     def on_key_press(self, key, modifiers):
@@ -52,8 +34,9 @@ class MyGame(arcade.Window):
 
 def main():
     """ Main method """
-    window = MyGame()
-    window.setup()
+    window = arcade.Window(SCREEN_WIDTH, SCREEN_HEIGHT, SCREEN_TITLE)
+    start_view = StartWindow()
+    window.show_view(start_view)
     arcade.run()
 
 
