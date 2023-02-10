@@ -1,28 +1,43 @@
-# Importieren der Pygame-Bibliothek
-import pygame
-import source.player
+"""
+Platformer Game
+"""
+import arcade
 
-# initialisieren von pygame
-pygame.init()
+# Constants
+SCREEN_WIDTH = 1000
+SCREEN_HEIGHT = 650
+SCREEN_TITLE = "Platformer"
 
-# genutzte Farbe
-ORANGE  = ( 255, 140, 0)
-RED     = ( 255, 0, 0)
-GREEN   = ( 0, 255, 0)
-BLACK = ( 0, 0, 0)
-WHITE   = ( 255, 255, 255)
 
-# Fenster öffnen
-pygame.display.set_mode((640, 480))
+class MyGame(arcade.Window):
+    """
+    Main application class.
+    """
 
-# Titel für Fensterkopf
-pygame.display.set_caption("Game Jam")
+    def __init__(self):
 
-# solange die Variable True ist, soll das Spiel laufen
-active = True
+        # Call the parent class and set up the window
+        super().__init__(SCREEN_WIDTH, SCREEN_HEIGHT, SCREEN_TITLE)
 
-# Schleife Hauptprogramm
-while active:
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            active = False
+        arcade.set_background_color(arcade.csscolor.CORNFLOWER_BLUE)
+
+    def setup(self):
+        """ Set up the game here. Call this function to restart the game. """
+        pass
+
+    def on_draw(self):
+        """ Render the screen. """
+
+        arcade.start_render()
+        # Code to draw the screen goes here
+
+
+def main():
+    """ Main method """
+    window = MyGame()
+    window.setup()
+    arcade.run()
+
+
+if __name__ == "__main__":
+    main()
