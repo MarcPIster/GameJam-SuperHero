@@ -1,5 +1,6 @@
 # Importieren der Pygame-Bibliothek
 import pygame
+import source.player
 
 # initialisieren von pygame
 pygame.init()
