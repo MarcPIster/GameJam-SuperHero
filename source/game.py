@@ -5,8 +5,9 @@ from source.menus.pause_screen import PauseManager
 
 # LAYER order:
 # 1: Platforms
-# 2: Player
-# 3: Coins
+# 2: Items (BombItem and FireItem)
+# 3: Player
+# 4: Coins
 
 
 class MyGame(arcade.View):
@@ -26,6 +27,18 @@ class MyGame(arcade.View):
         self.tile_map = None
         self.moving_platforms = None
         self.pause_manager = None
+
+        self.gui_camera = None
+        self.total_time = 0.0
+        self.timer_text = arcade.Text(
+            text="00:00:00",
+            start_x=self.window.width // 2,
+            start_y=self.window.height - 50,
+            color=arcade.color.WHITE,
+            font_size=40,
+            anchor_x="center"
+        )
+
         self.sound_manager = sound_manager
         arcade.set_background_color(arcade.csscolor.CORNFLOWER_BLUE)
 
@@ -52,7 +65,7 @@ class MyGame(arcade.View):
             self.player.physics_engine = arcade.PhysicsEnginePlatformer(self.player_list[0],
                                                                         walls=self.scene["Platforms"],
                                                                         gravity_constant=self.gravity_constant)
-                                                        
+
 
     def on_show_view(self):
         """ This is run once when we switch to this view """
@@ -62,16 +75,31 @@ class MyGame(arcade.View):
         """ Set up the game here. Call this function to restart the game. """
         self.load_level(self.map_manager.load_level(1))
         self.pause_manager = PauseManager()
+        self.gui_camera = arcade.Camera(self.window.width, self.window.height)
+        self.total_time = 0.0
 
     def on_draw(self):
         """ Render the screen. """
         self.clear()
         self.scene.draw()
-        # Code to draw the screen goes here
+        self.player.powerups.draw()
+        self.player.bar_list.draw()
+
+        self.gui_camera.use()
+        half_window_width = self.window.width // 2
+        point_list = ((half_window_width - 170, self.window.height),
+                      (half_window_width + 170, self.window.height),
+                      (half_window_width + 150, self.window.height - 90),
+                      (half_window_width - 150, self.window.height - 90))
+        arcade.draw_polygon_filled(point_list, (59, 68, 75, 150))
+        score_text = f"Score: {self.player.score}"
+        arcade.draw_text(score_text, half_window_width - 100, self.window.height - 80, arcade.color.WHITE, 14)
+        self.timer_text.draw()
 
     def on_key_press(self, key, modifiers):
         # TODO: remove again, just to test switching levels
-
+        if key == arcade.key.P:
+            self.player.decrease_health(5)
         if key == arcade.key.J:
             self.load_level(self.map_manager.load_level(1))
         if key == arcade.key.K:
@@ -99,4 +127,23 @@ class MyGame(arcade.View):
         for coin in coin_hit_list:
             coin.remove_from_sprite_lists()
             self.player.increase_score()
-            print(self.player.score)
+
+        # update timer
+        self.total_time += delta_time
+        minutes = int(self.total_time) // 60
+        seconds = int(self.total_time) % 60
+        seconds_100s = int((self.total_time - seconds) * 100)
+        self.timer_text.text = f"{minutes:02d}:{seconds:02d}:{seconds_100s:02d}"
+
+        # check item collision
+        player_collision_list = arcade.check_for_collision_with_lists(self.player, [
+            self.scene["FireItem"],
+            self.scene["BombItem"]
+        ])
+
+        for collision in player_collision_list:
+            if self.scene["FireItem"] in collision.sprite_lists:
+                self.player.activate_fire_shoot()
+            elif self.scene["BombItem"] in collision.sprite_lists:
+                self.player.activate_bomb_shoot()
+            collision.remove_from_sprite_lists()
