@@ -14,6 +14,8 @@ class SaveManager:
                 print("Save file found!")
                 print("Content of save file:")
                 for line in content.split("\n"):
+                    if line == "":
+                        continue
                     self.save_data.append(line + "\n")
                 print(self.save_data)
         except FileNotFoundError:

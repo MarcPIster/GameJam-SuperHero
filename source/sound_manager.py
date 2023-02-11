@@ -54,3 +54,13 @@ class SoundManager:
             player.volume = volume
     def get_sound_manager(self):
         return self
+
+    def stop_all_sounds(self):
+        for player in self.player_sound.values():
+            arcade.stop_sound(player)
+        self.player_sound = {}
+
+    def stop_all_music(self):
+        for player in self.player_music.values():
+            arcade.stop_sound(player)
+        self.player_music = {}

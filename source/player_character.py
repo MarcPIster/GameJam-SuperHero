@@ -19,8 +19,11 @@ def load_texture_pair(filename):
 
 
 class Player(arcade.Sprite):
-    def __init__(self, x, y):
+    def __init__(self, x, y, sound_manager):
         super().__init__()
+        self.sound_manager = sound_manager
+
+
         self.player_sprite = arcade.Sprite("./assets/player/walk/walk0.png", 1.5)
         self.player_sprite.center_x = 100
         self.player_sprite.center_y = 500
@@ -86,6 +89,7 @@ class Player(arcade.Sprite):
         self.shot_texture = []
         self.knocked_texture = []
         self.set_up()
+
 
     def set_up(self):
         self.animHit = ["./assets/player/hit/hit0.png", "./assets/player/hit/hit1.png"]
@@ -253,13 +257,14 @@ class Player(arcade.Sprite):
         self.energy -= energy
         if self.energy <= 0:
             self.energy = 0
-
+        self.sound_manager.play_sound("hit")
         self.shooting_bar.fullness = (self.energy / PLAYER_ENERGY)
 
     def activate_fire_shoot(self):
         if self.hasFireShoot:
             return
         self.hasFireShoot = True
+        self.sound_manager.play_sound("item-collect")
         sprite = arcade.Sprite("./assets/powerups/Fire.png", 0.14)
         self.powerups.append(sprite)
 
@@ -267,5 +272,6 @@ class Player(arcade.Sprite):
         if self.hasBombShoot:
             return
         self.hasBombShoot = True
+        self.sound_manager.play_sound("item-collect")
         sprite = arcade.Sprite("./assets/powerups/Bomb.png", 0.14)
         self.powerups.append(sprite)
