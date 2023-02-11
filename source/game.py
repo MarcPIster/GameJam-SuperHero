@@ -1,5 +1,5 @@
 import arcade
-from source.josis_test_player import Player
+from source.player_character import Player
 from source.maps.map_manager import MapManager
 from source.menus.pause_screen import PauseManager
 
@@ -19,7 +19,9 @@ class MyGame(arcade.View):
         self.physics_engine = None
         self.map = None
         self.player = None
+        self.player_list = None
         self.scene = None
+        self.gravity_constant = 0.5
         self.map_manager = MapManager()
         self.tile_map = None
         self.moving_platforms = None
@@ -32,17 +34,24 @@ class MyGame(arcade.View):
 
         self.scene.add_sprite_list_before("Player", "Coins")
 
-        self.player = Player()
-        self.scene.add_sprite("Player", self.player.player_sprite)
+        self.player = Player(arcade.get_display_size()[0], arcade.get_display_size()[1])
+        self.player_list = arcade.SpriteList()
+        self.player.center_x = 100
+        self.player.center_y = 500
+        self.player_list.append(self.player)
+        self.scene.add_sprite("Player", self.player_list[0])
 
         try:
-            self.player.physics_engine = arcade.PhysicsEnginePlatformer(self.player.player_sprite,
+            self.player.physics_engine = arcade.PhysicsEnginePlatformer(self.player_list[0],
                                                                         platforms=self.scene["Moving Platforms"],
-                                                                        walls=self.scene["Platforms"])
+                                                                        walls=self.scene["Platforms"],
+                                                                        gravity_constant=self.gravity_constant)
             self.moving_platforms = True
         except KeyError:
-            self.player.physics_engine = arcade.PhysicsEngineSimple(self.player.player_sprite,
-                                                                    walls=self.scene["Platforms"])
+            self.player.physics_engine = arcade.PhysicsEnginePlatformer(self.player_list[0],
+                                                                        walls=self.scene["Platforms"],
+                                                                        gravity_constant=self.gravity_constant)
+                                                        
 
     def on_show_view(self):
         """ This is run once when we switch to this view """
@@ -61,6 +70,7 @@ class MyGame(arcade.View):
 
     def on_key_press(self, key, modifiers):
         # TODO: remove again, just to test switching levels
+
         if key == arcade.key.J:
             self.load_level(self.map_manager.load_level(1))
         if key == arcade.key.K:
@@ -69,7 +79,6 @@ class MyGame(arcade.View):
             self.load_level(self.map_manager.load_level(3))
         if key == arcade.key.M:
             self.load_level(self.map_manager.load_level(4))
-
         self.player.on_key_press(key, modifiers)
 
     def on_key_release(self, key, modifiers):
@@ -77,12 +86,15 @@ class MyGame(arcade.View):
         self.pause_manager.on_key_press(key, self)
 
     def on_update(self, delta_time):
-        self.player.on_update(delta_time)
+        self.player_list.on_update(delta_time)
+        self.player_list.update()
+        self.player_list.update_animation(delta_time)
+
         if self.moving_platforms:
             self.scene.update(["Moving Platforms"])
 
         # detect collision with coins
-        coin_hit_list = arcade.check_for_collision_with_list(self.player.player_sprite, self.scene["Coins"])
+        coin_hit_list = arcade.check_for_collision_with_list(self.player_list[0], self.scene["Coins"])
         for coin in coin_hit_list:
             coin.remove_from_sprite_lists()
             self.player.increase_score()
