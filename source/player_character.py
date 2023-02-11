@@ -279,7 +279,7 @@ class Player(arcade.Sprite):
         self.powerups.append(sprite)
 
     def update_energy(self, delta_time):
-        if (self.energy_timer > 1):
+        if self.energy_timer > 1:
             self.energy_timer = 0
             self.energy += 5
             if self.energy > PLAYER_ENERGY:

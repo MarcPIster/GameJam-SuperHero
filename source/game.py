@@ -182,7 +182,7 @@ class MyGame(arcade.View):
 
         # update timer
         self.total_time += delta_time
-        time_passed = 10 - self.total_time
+        time_passed = 120 - self.total_time
         minutes = int(time_passed) // 60
         seconds = int(time_passed) % 60
         seconds_100s = int((time_passed - (minutes * 60) - seconds) * 100)
