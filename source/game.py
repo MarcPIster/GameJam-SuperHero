@@ -165,6 +165,7 @@ class MyGame(arcade.View):
         self.player_list.update()
         self.player_list.update_animation(delta_time)
 
+
         for player in self.player_list:
             if player.health <= 0:
                 self.end_game()

@@ -41,6 +41,7 @@ class Player(arcade.Sprite):
 
         self.health = PLAYER_HEALTH
         self.energy = PLAYER_ENERGY
+        self.energy_timer = 0
         self.bar_list = arcade.SpriteList()
         self.indicator_bar: IndicatorBar = IndicatorBar(self, self.bar_list,
                                                         (self.player_sprite.center_x, self.player_sprite.center_y))
@@ -133,6 +134,7 @@ class Player(arcade.Sprite):
 
     def on_update(self, delta_time):
         self.physics_engine.update()
+        self.update_energy(delta_time)
 
         self.indicator_bar.position = (
             self.center_x,
@@ -275,3 +277,12 @@ class Player(arcade.Sprite):
         self.sound_manager.play_sound("item-collect")
         sprite = arcade.Sprite("./assets/powerups/Bomb.png", 0.14)
         self.powerups.append(sprite)
+
+    def update_energy(self, delta_time):
+        if (self.energy_timer > 1):
+            self.energy_timer = 0
+            self.energy += 5
+            if self.energy > PLAYER_ENERGY:
+                self.energy = PLAYER_ENERGY
+            self.shooting_bar.fullness = (self.energy / PLAYER_ENERGY)
+        self.energy_timer += delta_time
