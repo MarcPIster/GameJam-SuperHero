@@ -8,6 +8,7 @@ class Player:
         self.player_sprite.center_y = 500
         self.physics_engine = None
         self.speed = 5
+        self.score = 0
 
     def on_key_press(self, key, modifiers):
         """Called whenever a key is pressed. """
@@ -33,3 +34,6 @@ class Player:
 
     def on_update(self, delta_time):
         self.physics_engine.update()
+
+    def increase_score(self):
+        self.score += 1
