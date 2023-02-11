@@ -8,6 +8,7 @@ from source.menus.pause_screen import PauseManager
 # 2: Player
 # 3: Coins
 
+
 class MyGame(arcade.View):
     """
     Main application class.
@@ -79,3 +80,10 @@ class MyGame(arcade.View):
         self.player.on_update(delta_time)
         if self.moving_platforms:
             self.scene.update(["Moving Platforms"])
+
+        # detect collision with coins
+        coin_hit_list = arcade.check_for_collision_with_list(self.player.player_sprite, self.scene["Coins"])
+        for coin in coin_hit_list:
+            coin.remove_from_sprite_lists()
+            self.player.increase_score()
+            print(self.player.score)
