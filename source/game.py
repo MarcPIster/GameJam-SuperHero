@@ -135,7 +135,7 @@ class MyGame(arcade.View):
         self.timer_text.text = f"{minutes:02d}:{seconds:02d}:{seconds_100s:02d}"
 
         # check item collision
-        player_collision_list = arcade.check_for_collision_with_lists(self.player.player_sprite, [
+        player_collision_list = arcade.check_for_collision_with_lists(self.player, [
             self.scene["FireItem"],
             self.scene["BombItem"]
         ])
