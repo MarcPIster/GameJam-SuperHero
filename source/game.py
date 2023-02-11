@@ -1,4 +1,6 @@
 import arcade
+
+from source.menus.end_screen import EndWindow
 from source.player_character import Player
 from source.maps.map_manager import MapManager
 from source.menus.pause_screen import PauseManager
@@ -9,6 +11,8 @@ from source.menus.pause_screen import PauseManager
 # 3: Player
 # 4: Coins
 
+MAX_LEVEL = 4
+
 
 class MyGame(arcade.View):
     """
@@ -17,18 +21,20 @@ class MyGame(arcade.View):
 
     def __init__(self, sound_manager):
         super().__init__()
+        self.game_over = False
+        self.player_won = -1
+        self.level = 0
+        self.next_level = True
         self.physics_engine = None
-        self.map = None
         self.player = None
         self.player_list = None
         self.scene = None
         self.gravity_constant = 0.5
         self.map_manager = MapManager()
-        self.tile_map = None
         self.moving_platforms = None
-        self.pause_manager = None
+        self.pause_manager = PauseManager()
 
-        self.gui_camera = None
+        self.gui_camera = arcade.Camera(self.window.width, self.window.height)
         self.total_time = 0.0
         self.timer_text = arcade.Text(
             text="00:00:00",
@@ -42,7 +48,19 @@ class MyGame(arcade.View):
         self.sound_manager = sound_manager
         arcade.set_background_color(arcade.csscolor.CORNFLOWER_BLUE)
 
+
+    def setup(self, level=1):
+        """ Set up the game here. Call this function to restart the game. """
+        self.game_over = False
+        self.load_level(level)
+        self.total_time = 0.0
+
+
     def load_level(self, level_id):
+        self.level = level
+        if self.level >= MAX_LEVEL:
+            self.next_level = False
+        self.scene = arcade.Scene.from_tilemap(self.map_manager.load_level(level))
         self.sound_manager.stop_all_music()
         self.sound_manager.stop_all_sounds()
         print(f'Loading level{level_id} ...')
@@ -57,6 +75,7 @@ class MyGame(arcade.View):
 
         self.moving_platforms = False
         self.scene = arcade.Scene.from_tilemap(self.map_manager.load_level(level_id))
+
 
         self.scene.add_sprite_list_before("Player", "Coins")
 
@@ -78,17 +97,9 @@ class MyGame(arcade.View):
                                                                         walls=self.scene["Platforms"],
                                                                         gravity_constant=self.gravity_constant)
 
-
     def on_show_view(self):
         """ This is run once when we switch to this view """
         arcade.set_viewport(0, self.window.width, 0, self.window.height)
-
-    def setup(self):
-        """ Set up the game here. Call this function to restart the game. """
-        self.load_level(1)
-        self.pause_manager = PauseManager()
-        self.gui_camera = arcade.Camera(self.window.width, self.window.height)
-        self.total_time = 0.0
 
     def on_draw(self):
         """ Render the screen. """
@@ -126,10 +137,28 @@ class MyGame(arcade.View):
         self.player.on_key_release(key, modifiers)
         self.pause_manager.on_key_press(key, self)
 
+    def end_game(self):
+        tmp = 0
+        tmp_x = 0
+        for x in range(len(self.player_list)):
+            if self.player_list[x].score > tmp:
+                tmp = self.player_list[x].score
+                tmp_x = x
+        self.player_won = tmp_x
+        for x in range(len(self.player_list)):
+            if self.player_list[x].health > 0:
+                self.player_won = x
+        self.game_over = True
+        self.window.show_view(EndWindow(self))
+
     def on_update(self, delta_time):
         self.player_list.on_update(delta_time)
         self.player_list.update()
         self.player_list.update_animation(delta_time)
+
+        for player in self.player_list:
+            if player.health <= 0:
+                self.end_game()
 
         if self.moving_platforms:
             self.scene.update(["Moving Platforms"])
@@ -142,10 +171,13 @@ class MyGame(arcade.View):
 
         # update timer
         self.total_time += delta_time
-        minutes = int(self.total_time) // 60
-        seconds = int(self.total_time) % 60
-        seconds_100s = int((self.total_time - seconds) * 100)
+        time_passed = 10 - self.total_time
+        minutes = int(time_passed) // 60
+        seconds = int(time_passed) % 60
+        seconds_100s = int((time_passed - (minutes * 60) - seconds) * 100)
         self.timer_text.text = f"{minutes:02d}:{seconds:02d}:{seconds_100s:02d}"
+        if time_passed <= 0:
+            self.end_game()
 
         # check item collision
         player_collision_list = arcade.check_for_collision_with_lists(self.player, [
