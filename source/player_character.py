@@ -1,3 +1,5 @@
+import random
+
 import arcade
 from arcade.examples.sprite_health import IndicatorBar
 
@@ -166,6 +168,7 @@ class Player(arcade.Sprite):
             if self.key_up_pressed:
                 self.center_y += self.jump_height
 
+
         # Check for out-of-bounds
         if self.left < 0:
             self.left = 0
@@ -208,6 +211,7 @@ class Player(arcade.Sprite):
 
         if self.change_y != 0 or self.key_up_pressed:
             if self.cur_texture > 1:
+                self.sound_manager.play_sound("jump") # ToDo: Fix jump soumd, animation may not be the best place to play this
                 self.cur_texture = 0
             self.texture = self.jump_texture[self.cur_texture][self.facing_direction]
             return
@@ -252,7 +256,8 @@ class Player(arcade.Sprite):
         self.health -= damage
         if self.health <= 0:
             self.health = 0
-
+            self.sound_manager.play_sound("dead")
+        self.sound_manager.play_sound(f'hurt-{random.randint(1, 4)}')
         self.indicator_bar.fullness = (self.health / PLAYER_HEALTH)
 
     def shoot(self, energy):

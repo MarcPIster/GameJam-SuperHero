@@ -56,6 +56,11 @@ class MyGame(arcade.View):
         self.sound_manager.add_sound(f'coin-collect', f'./assets/sounds/coincollect.wav')
         self.sound_manager.add_sound(f'item-collect', f'./assets/sounds/itemcollect.wav')
         self.sound_manager.add_sound(f'beep', f'./assets/sounds/beep.wav')
+        self.sound_manager.add_sound(f'jump', f'./assets/sounds/jump.wav')
+        self.sound_manager.add_sound(f'hurt-1', f'./assets/sounds/hurt1.wav')
+        self.sound_manager.add_sound(f'hurt-2', f'./assets/sounds/hurt2.wav')
+        self.sound_manager.add_sound(f'hurt-3', f'./assets/sounds/hurt3.wav')
+        self.sound_manager.add_sound(f'hurt-4', f'./assets/sounds/hurt4.wav')
 
 
     def setup(self, level=1):
