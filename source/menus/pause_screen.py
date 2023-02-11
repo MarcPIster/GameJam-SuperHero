@@ -1,5 +1,5 @@
 import arcade
-
+from source.menus.setting_screen import SettingsWindow
 
 class PauseManager:
     def __init__(self):
@@ -22,6 +22,7 @@ class PauseWindow(arcade.View):
         # a UIManager to handle the UI.
         self.manager = arcade.gui.UIManager()
         self.manager.enable()
+        self.sound_manager = game_view.sound_manager.get_sound_manager()
 
         # Set background color
         arcade.set_background_color(arcade.color.DARK_BLUE_GRAY)
@@ -60,6 +61,9 @@ class PauseWindow(arcade.View):
         self.deactivate()
 
     def on_click_settings(self, event):
+        settings = SettingsWindow(self.sound_manager, self)
+        self.manager.disable()
+        self.window.show_view(settings)
         print("Settings:", event)
 
     def on_click_quit(self, event):
