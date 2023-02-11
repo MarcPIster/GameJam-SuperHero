@@ -30,8 +30,10 @@ class SettingsWindow(arcade.View):
         self.v_box = arcade.gui.UIBoxLayout()
 
         # Add a label for the music volume slider
+        music_volume_text = f"Music Volume: {int(self.sound_manager.get_music_volume() * 100)}"
+
         self.music_volume_label = arcade.gui.UILabel(
-            text="Music Volume:",
+            text=music_volume_text,
             color=arcade.color.WHITE,
             font_size=18,
         )
@@ -43,8 +45,9 @@ class SettingsWindow(arcade.View):
         self.v_box.add(self.music_volume_slider.with_space_around(bottom=30))
 
         # Add a label for the sound volume slider
+        sound_volume_text = f"Sound Volume: {int(self.sound_manager.get_sound_volume() * 100)}"
         self.sound_volume_label = arcade.gui.UILabel(
-            text="Sound Volume:",
+            text=sound_volume_text,
             color=arcade.color.WHITE,
             font_size=18,
         )
@@ -73,11 +76,16 @@ class SettingsWindow(arcade.View):
         volume = value.new_value / 100.0
         self.sound_manager.set_music_volume(volume)
         self.sound_manager.save_manager.save("music_volume: " + str(volume))
+        music_volume_text = f"Music Volume: {int(volume * 100)}"
+        self.music_volume_label.text = music_volume_text
+
 
     def on_sound_volume_changed(self, value):
         volume = value.new_value / 100.0
         self.sound_manager.set_sound_volume(volume)
         self.sound_manager.save_manager.save("sound_volume: " + str(volume))
+        sound_volume_text = f"Sound Volume: {int(volume * 100)}"
+        self.sound_volume_label.text = sound_volume_text
 
     def on_click_back(self, event):
         self.deactivate()
