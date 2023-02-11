@@ -1,20 +1,18 @@
 import arcade
-import arcade.gui
-from source.game import MyGame
 from source.menus.setting_screen import SettingsWindow
 
 
-class StartWindow(arcade.View):
-    def __init__(self, sound_manager):
+class EndWindow(arcade.View):
+    def __init__(self, game_view):
         super().__init__()
+
+        self.game_view = game_view
 
         # --- Required for all code that uses UI element,
         # a UIManager to handle the UI.
         self.manager = arcade.gui.UIManager()
         self.manager.enable()
-        self.sound_manager = sound_manager.get_sound_manager()
-        self.sound_manager.add_music("maintheme", "./assets/sounds/theme.wav")
-        self.sound_manager.play_music("maintheme")
+        self.sound_manager = game_view.sound_manager.get_sound_manager()
 
         # Set background color
         arcade.set_background_color(arcade.color.DARK_BLUE_GRAY)
@@ -22,10 +20,25 @@ class StartWindow(arcade.View):
         # Create a vertical BoxGroup to align buttons
         self.v_box = arcade.gui.UIBoxLayout()
 
+        # add text "Game Over" to v_box
+        self.v_box.add(arcade.gui.UILabel(
+            x=self.window.width - 100,
+            y=self.window.height,
+            text_color=arcade.color.WHITE,
+            font_size=30,
+            text=f"Player {self.game_view.player_won + 1} won!",
+            height=80,
+        ))
+
         # Create the buttons
-        start_button = arcade.gui.UIFlatButton(text="Start Game", width=200)
-        self.v_box.add(start_button.with_space_around(bottom=20))
-        start_button.on_click = self.on_click_start
+        restart_button = arcade.gui.UIFlatButton(text="Restart Game", width=200)
+        self.v_box.add(restart_button.with_space_around(bottom=20))
+        restart_button.on_click = self.on_click_restart
+
+        if self.game_view.next_level:
+            next_level_button = arcade.gui.UIFlatButton(text="Next Level", width=200)
+            self.v_box.add(next_level_button.with_space_around(bottom=20))
+            next_level_button.on_click = self.on_click_next_level
 
         settings_button = arcade.gui.UIFlatButton(text="Settings", width=200)
         self.v_box.add(settings_button.with_space_around(bottom=20))
@@ -43,12 +56,19 @@ class StartWindow(arcade.View):
                 child=self.v_box)
         )
 
-    def on_click_start(self, event):
-        game = MyGame(self.sound_manager)
-        game.setup()
+    def on_click_restart(self, event):
+        arcade.set_background_color(arcade.color.CORNFLOWER_BLUE)
+        self.game_view.setup(self.game_view.level)
+        self.window.show_view(self.game_view)
+        print("Resume:", event)
         self.deactivate()
-        self.window.show_view(game)
-        print("Start:", event)
+
+    def on_click_next_level(self, event):
+        arcade.set_background_color(arcade.color.CORNFLOWER_BLUE)
+        self.game_view.setup(self.game_view.level + 1)
+        self.window.show_view(self.game_view)
+        print("Next Level:", event)
+        self.deactivate()
 
     def on_click_settings(self, event):
         settings = SettingsWindow(self.sound_manager, self)
@@ -62,16 +82,12 @@ class StartWindow(arcade.View):
 
     def deactivate(self):
         self.manager.disable()
-        self.sound_manager.stop_music("maintheme")
-
-    def on_draw(self):
-        self.clear()
-        self.manager.draw()
 
     def activate(self):
         self.manager.enable()
         self.window.show_view(self)
 
-    def on_show(self):
-        pass
+    def on_draw(self):
+        self.clear()
+        self.manager.draw()
 
