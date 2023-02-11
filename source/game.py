@@ -57,10 +57,10 @@ class MyGame(arcade.View):
 
 
     def load_level(self, level_id):
-        self.level = level
+        self.level = level_id
         if self.level >= MAX_LEVEL:
             self.next_level = False
-        self.scene = arcade.Scene.from_tilemap(self.map_manager.load_level(level))
+        self.scene = arcade.Scene.from_tilemap(self.map_manager.load_level(level_id))
         self.sound_manager.stop_all_music()
         self.sound_manager.stop_all_sounds()
         print(f'Loading level{level_id} ...')
