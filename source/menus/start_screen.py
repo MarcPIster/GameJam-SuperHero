@@ -1,15 +1,19 @@
 import arcade
 import arcade.gui
 from source.game import MyGame
+from source.menus.setting_screen import SettingsWindow
 
 class StartWindow(arcade.View):
-    def __init__(self):
+    def __init__(self, sound_manager):
         super().__init__()
 
         # --- Required for all code that uses UI element,
         # a UIManager to handle the UI.
         self.manager = arcade.gui.UIManager()
         self.manager.enable()
+        self.sound_manager = sound_manager.get_sound_manager()
+        self.sound_manager.add_music("maintheme", "./assets/sounds/theme.wav")
+        self.sound_manager.play_music("maintheme")
 
         # Set background color
         arcade.set_background_color(arcade.color.DARK_BLUE_GRAY)
@@ -49,6 +53,9 @@ class StartWindow(arcade.View):
         print("Start:", event)
 
     def on_click_settings(self, event):
+        settings = SettingsWindow(self.sound_manager, self)
+        self.manager.disable()
+        self.window.show_view(settings)
         print("Settings:", event)
 
     def on_click_quit(self, event):
@@ -57,8 +64,16 @@ class StartWindow(arcade.View):
 
     def deactivate(self):
         self.manager.disable()
+        self.sound_manager.stop_music("maintheme")
 
     def on_draw(self):
         self.clear()
         self.manager.draw()
+
+    def activate(self):
+        self.manager.enable()
+        self.window.show_view(self)
+
+    def on_show(self):
+        pass
 
