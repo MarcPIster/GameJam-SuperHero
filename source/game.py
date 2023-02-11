@@ -14,7 +14,7 @@ class MyGame(arcade.View):
     Main application class.
     """
 
-    def __init__(self):
+    def __init__(self, sound_manager):
         super().__init__()
         self.physics_engine = None
         self.map = None
@@ -26,6 +26,7 @@ class MyGame(arcade.View):
         self.tile_map = None
         self.moving_platforms = None
         self.pause_manager = None
+        self.sound_manager = sound_manager
         arcade.set_background_color(arcade.csscolor.CORNFLOWER_BLUE)
 
     def load_level(self, level):
@@ -83,7 +84,7 @@ class MyGame(arcade.View):
 
     def on_key_release(self, key, modifiers):
         self.player.on_key_release(key, modifiers)
-        self.pause_manager.on_key_press(key, self)
+        self.pause_manager.on_key_press(key, self, )
 
     def on_update(self, delta_time):
         self.player_list.on_update(delta_time)

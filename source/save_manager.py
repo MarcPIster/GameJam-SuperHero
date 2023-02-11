@@ -9,6 +9,7 @@ class SaveManager:
     def check_read_or_create_file(self):
         try:
             with open(self.save_file, 'r') as f:
+                self.save_data = []
                 content = f.read()
                 print("Save file found!")
                 print("Content of save file:")
