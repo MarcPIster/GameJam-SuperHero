@@ -40,5 +40,20 @@ class SoundManager:
             arcade.stop_sound(self.player_music[music_name])
             del self.player_music[music_name]
 
+    def get_sound_volume(self):
+        return self.volume_sound
+
+    def set_sound_volume(self, volume):
+        self.volume_sound = volume
+        for player in self.player_sound.values():
+            player.volume = volume
+
+    def get_music_volume(self):
+        return self.volume_music
+
+    def set_music_volume(self, volume):
+        self.volume_music = volume
+        for player in self.player_music.values():
+            player.volume = volume
     def get_sound_manager(self):
         return self

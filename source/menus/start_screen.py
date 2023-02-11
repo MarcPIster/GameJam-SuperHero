@@ -1,6 +1,7 @@
 import arcade
 import arcade.gui
 from source.game import MyGame
+from source.menus.setting_screen import SettingsWindow
 
 class StartWindow(arcade.View):
     def __init__(self, sound_manager):
@@ -52,6 +53,9 @@ class StartWindow(arcade.View):
         print("Start:", event)
 
     def on_click_settings(self, event):
+        settings = SettingsWindow(self.sound_manager, self)
+        self.manager.disable()
+        self.window.show_view(settings)
         print("Settings:", event)
 
     def on_click_quit(self, event):
@@ -65,4 +69,12 @@ class StartWindow(arcade.View):
     def on_draw(self):
         self.clear()
         self.manager.draw()
+
+    def activate(self):
+        self.manager.enable()
+        self.window.show_view(self)
+        #self.sound_manager.play_music("maintheme")
+
+    def on_show(self):
+        pass
 
