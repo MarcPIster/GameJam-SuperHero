@@ -45,8 +45,15 @@ class MyGame(arcade.View):
             anchor_x="center"
         )
 
-        self.sound_manager = sound_manager
         arcade.set_background_color(arcade.csscolor.CORNFLOWER_BLUE)
+
+        self.sound_manager = sound_manager
+
+        self.sound_manager.add_sound(f'hit2', f'./assets/sounds/hit2.wav')
+        self.sound_manager.add_sound(f'hit', f'./assets/sounds/hit1.wav')
+        self.sound_manager.add_sound(f'dead', f'./assets/sounds/diesound.wav')
+        self.sound_manager.add_sound(f'coin-collect', f'./assets/sounds/coincollect.wav')
+        self.sound_manager.add_sound(f'item-collect', f'./assets/sounds/itemcollect.wav')
 
 
     def setup(self, level=1):
@@ -168,10 +175,11 @@ class MyGame(arcade.View):
         for coin in coin_hit_list:
             coin.remove_from_sprite_lists()
             self.player.increase_score()
+            self.sound_manager.play_sound('coin-collect')
 
         # update timer
         self.total_time += delta_time
-        time_passed = 10 - self.total_time
+        time_passed = 120 - self.total_time
         minutes = int(time_passed) // 60
         seconds = int(time_passed) % 60
         seconds_100s = int((time_passed - (minutes * 60) - seconds) * 100)

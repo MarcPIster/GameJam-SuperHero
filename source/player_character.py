@@ -22,9 +22,6 @@ class Player(arcade.Sprite):
     def __init__(self, x, y, sound_manager):
         super().__init__()
         self.sound_manager = sound_manager
-        self.sound_manager.add_sound(f'hit2', f'./assets/sounds/hit2.wav')
-        self.sound_manager.add_sound(f'hit', f'./assets/sounds/hit1.wav')
-        self.sound_manager.add_sound(f'dead', f'./assets/sounds/diesound.wav')
 
 
         self.player_sprite = arcade.Sprite("./assets/player/walk/walk0.png", 1.5)
@@ -267,6 +264,7 @@ class Player(arcade.Sprite):
         if self.hasFireShoot:
             return
         self.hasFireShoot = True
+        self.sound_manager.play_sound("item-collect")
         sprite = arcade.Sprite("./assets/powerups/Fire.png", 0.14)
         self.powerups.append(sprite)
 
@@ -274,5 +272,6 @@ class Player(arcade.Sprite):
         if self.hasBombShoot:
             return
         self.hasBombShoot = True
+        self.sound_manager.play_sound("item-collect")
         sprite = arcade.Sprite("./assets/powerups/Bomb.png", 0.14)
         self.powerups.append(sprite)
