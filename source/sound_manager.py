@@ -1,18 +1,15 @@
 import arcade
 
 
-import arcade
-
-import arcade
-
 class SoundManager:
-    def __init__(self):
+    def __init__(self, save_manager):
         self.sound_list = {}
         self.music_list = {}
         self.player_sound = {}
         self.player_music = {}
-        self.volume_sound = 0.5
-        self.volume_music = 0.5
+        self.volume_sound = save_manager.get_sound_volume()
+        self.volume_music = save_manager.get_music_volume()
+        self.save_manager = save_manager
 
     def add_sound(self, sound_name, sound_file):
         self.sound_list[sound_name] = arcade.load_sound(sound_file)

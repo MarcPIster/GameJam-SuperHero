@@ -73,7 +73,6 @@ class StartWindow(arcade.View):
     def activate(self):
         self.manager.enable()
         self.window.show_view(self)
-        #self.sound_manager.play_music("maintheme")
 
     def on_show(self):
         pass

@@ -10,6 +10,7 @@ class SettingsWindow(arcade.View):
         super().__init__()
 
         self.open_view = current_view
+        self.sound_manager = sound_manager
 
 
         self.ui_manager = arcade.gui.UIManager()
@@ -38,7 +39,7 @@ class SettingsWindow(arcade.View):
 
         # Add a slider for the music volume
         self.music_volume_slider = UISlider(value=sound_manager.get_music_volume() * 100, min_value=0, max_value=100)
-        self.music_volume_slider.on_value_changed = self.on_music_volume_changed
+        self.music_volume_slider.on_change = self.on_music_volume_changed
         self.v_box.add(self.music_volume_slider.with_space_around(bottom=30))
 
         # Add a label for the sound volume slider
@@ -52,7 +53,7 @@ class SettingsWindow(arcade.View):
         # Add a slider for the sound volume
 
         self.sound_volume_slider = UISlider(value=sound_manager.get_sound_volume() * 100, min_value=0, max_value=100)
-        self.sound_volume_slider.on_value_changed = self.on_sound_volume_changed
+        self.sound_volume_slider.on_change = self.on_sound_volume_changed
         self.v_box.add(self.sound_volume_slider.with_space_around(bottom=30))
 
         back_button = arcade.gui.UIFlatButton(text="Back", width=200)
@@ -68,20 +69,21 @@ class SettingsWindow(arcade.View):
             )
         )
 
-        self.sound_manager = sound_manager
-
     def on_music_volume_changed(self, value):
-        volume = value / 100.0
+        volume = value.new_value / 100.0
         self.sound_manager.set_music_volume(volume)
+        self.sound_manager.save_manager.save("music_volume: " + str(volume))
 
     def on_sound_volume_changed(self, value):
-        volume = value / 100.0
+        volume = value.new_value / 100.0
         self.sound_manager.set_sound_volume(volume)
+        self.sound_manager.save_manager.save("sound_volume: " + str(volume))
 
     def on_click_back(self, event):
         self.deactivate()
         self.open_view.activate()
         self.window.show_view(self.open_view)
+        self.sound_manager.save_manager.write_to_file()
 
     def deactivate(self):
         self.ui_manager.disable()
