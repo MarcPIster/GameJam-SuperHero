@@ -57,6 +57,7 @@ class PauseWindow(arcade.View):
         arcade.set_background_color(arcade.color.CORNFLOWER_BLUE)
         self.window.show_view(self.game_view)
         print("Resume:", event)
+        self.deactivate()
 
     def on_click_settings(self, event):
         print("Settings:", event)
