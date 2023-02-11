@@ -48,22 +48,38 @@ class MyGame(arcade.View):
         self.sound_manager = sound_manager
         arcade.set_background_color(arcade.csscolor.CORNFLOWER_BLUE)
 
+
     def setup(self, level=1):
         """ Set up the game here. Call this function to restart the game. """
         self.game_over = False
         self.load_level(level)
         self.total_time = 0.0
 
-    def load_level(self, level):
-        self.moving_platforms = False
+
+    def load_level(self, level_id):
         self.level = level
         if self.level >= MAX_LEVEL:
             self.next_level = False
         self.scene = arcade.Scene.from_tilemap(self.map_manager.load_level(level))
+        self.sound_manager.stop_all_music()
+        self.sound_manager.stop_all_sounds()
+        print(f'Loading level{level_id} ...')
+        try:
+            self.sound_manager.add_music(f'level{level_id}', f'./assets/sounds/level{level_id}.wav')
+            self.sound_manager.play_music(f'level{level_id}')
+        except FileNotFoundError:
+            print(f'No music for level {level_id} found. Default theme will be used...')
+            self.sound_manager.add_music('maintheme', './assets/sounds/theme.wav')
+            self.sound_manager.play_music('maintheme')
+
+
+        self.moving_platforms = False
+        self.scene = arcade.Scene.from_tilemap(self.map_manager.load_level(level_id))
+
 
         self.scene.add_sprite_list_before("Player", "Coins")
 
-        self.player = Player(arcade.get_display_size()[0], arcade.get_display_size()[1])
+        self.player = Player(arcade.get_display_size()[0], arcade.get_display_size()[1], self.sound_manager)
         self.player_list = arcade.SpriteList()
         self.player.center_x = 100
         self.player.center_y = 500
@@ -108,18 +124,18 @@ class MyGame(arcade.View):
         if key == arcade.key.P:
             self.player.decrease_health(5)
         if key == arcade.key.J:
-            self.load_level(self.map_manager.load_level(1))
+            self.load_level(1)
         if key == arcade.key.K:
-            self.load_level(self.map_manager.load_level(2))
+            self.load_level(2)
         if key == arcade.key.L:
-            self.load_level(self.map_manager.load_level(3))
+            self.load_level(3)
         if key == arcade.key.M:
-            self.load_level(self.map_manager.load_level(4))
+            self.load_level(4)
         self.player.on_key_press(key, modifiers)
 
     def on_key_release(self, key, modifiers):
         self.player.on_key_release(key, modifiers)
-        self.pause_manager.on_key_press(key, self, )
+        self.pause_manager.on_key_press(key, self)
 
     def end_game(self):
         tmp = 0
