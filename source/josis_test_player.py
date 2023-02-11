@@ -20,8 +20,6 @@ class Player:
         self.hasFireShoot = False
         self.hasBombShoot = False
         self.powerups = arcade.SpriteList()
-        self.activate_bomb_shoot()
-        self.activate_fire_shoot()
 
         self.health = PLAYER_HEALTH
         self.energy = PLAYER_ENERGY
@@ -90,11 +88,15 @@ class Player:
         self.shooting_bar.fullness = (self.energy / PLAYER_ENERGY)
 
     def activate_fire_shoot(self):
+        if self.hasFireShoot:
+            return
         self.hasFireShoot = True
         sprite = arcade.Sprite("./assets/powerups/Fire.png", 0.14)
         self.powerups.append(sprite)
 
     def activate_bomb_shoot(self):
+        if self.hasBombShoot:
+            return
         self.hasBombShoot = True
         sprite = arcade.Sprite("./assets/powerups/Bomb.png", 0.14)
         self.powerups.append(sprite)

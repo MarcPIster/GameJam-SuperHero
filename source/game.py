@@ -5,8 +5,9 @@ from source.menus.pause_screen import PauseManager
 
 # LAYER order:
 # 1: Platforms
-# 2: Player
-# 3: Coins
+# 2: Items (BombItem and FireItem)
+# 3: Player
+# 4: Coins
 
 
 class MyGame(arcade.View):
@@ -114,7 +115,6 @@ class MyGame(arcade.View):
         for coin in coin_hit_list:
             coin.remove_from_sprite_lists()
             self.player.increase_score()
-            print(self.player.score)
 
         # update timer
         self.total_time += delta_time
@@ -122,3 +122,16 @@ class MyGame(arcade.View):
         seconds = int(self.total_time) % 60
         seconds_100s = int((self.total_time - seconds) * 100)
         self.timer_text.text = f"{minutes:02d}:{seconds:02d}:{seconds_100s:02d}"
+
+        # check item collision
+        player_collision_list = arcade.check_for_collision_with_lists(self.player.player_sprite, [
+            self.scene["FireItem"],
+            self.scene["BombItem"]
+        ])
+
+        for collision in player_collision_list:
+            if self.scene["FireItem"] in collision.sprite_lists:
+                self.player.activate_fire_shoot()
+            elif self.scene["BombItem"] in collision.sprite_lists:
+                self.player.activate_bomb_shoot()
+            collision.remove_from_sprite_lists()
