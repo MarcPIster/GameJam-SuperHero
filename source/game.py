@@ -115,19 +115,18 @@ class MyGame(arcade.View):
                                                                         gravity_constant=self.gravity_constant)
 
         if self.player_mode == Playermode.DUO.value:
-            self.second_player = Player(arcade.get_display_size()[0], arcade.get_display_size()[1], self.player_mode)
-            self.second_player_list = arcade.SpriteList()
+            self.second_player = Player(arcade.get_display_size()[0], arcade.get_display_size()[1], self.sound_manager, self.player_mode)
             self.second_player.center_x = 100
             self.second_player.center_y = 500
-            self.second_player_list.append(self.second_player)
-            self.scene.add_sprite("Player2", self.second_player_list[0])
+            self.player_list.append(self.second_player)
+            self.scene.add_sprite("Player2", self.player_list[1])
             try:
-                self.second_player.physics_engine = arcade.PhysicsEnginePlatformer(self.second_player_list[0],
+                self.second_player.physics_engine = arcade.PhysicsEnginePlatformer(self.player_list[1],
                                                                             platforms=self.scene["Moving Platforms"],
                                                                             walls=self.scene["Platforms"],
                                                                             gravity_constant=self.gravity_constant)
             except KeyError:
-                self.second_player.physics_engine = arcade.PhysicsEnginePlatformer(self.second_player_list[0],
+                self.second_player.physics_engine = arcade.PhysicsEnginePlatformer(self.player_list[1],
                                                                             walls=self.scene["Platforms"],
                                                                             gravity_constant=self.gravity_constant)
                                                         
@@ -140,8 +139,9 @@ class MyGame(arcade.View):
         """ Render the screen. """
         self.clear()
         self.scene.draw()
-        self.player.powerups.draw()
-        self.player.bar_list.draw()
+        for player in self.player_list:
+            player.powerups.draw()
+            player.bar_list.draw()
 
         self.gui_camera.use()
         half_window_width = self.window.width // 2
@@ -193,11 +193,6 @@ class MyGame(arcade.View):
         self.player_list.update()
         self.player_list.update_animation(delta_time)
 
-        if self.player_mode == Playermode.DUO.value:
-            self.second_player_list.on_update(delta_time)
-            self.second_player_list.update()
-            self.second_player_list.update_animation(delta_time)
-
 
         for player in self.player_list:
             if player.health <= 0:
@@ -207,11 +202,15 @@ class MyGame(arcade.View):
             self.scene.update(["Moving Platforms"])
 
         # detect collision with coins
-        coin_hit_list = arcade.check_for_collision_with_list(self.player_list[0], self.scene["Coins"])
-        for coin in coin_hit_list:
-            coin.remove_from_sprite_lists()
-            self.player.increase_score()
-            self.sound_manager.play_sound('coin-collect')
+        for i in range(len(self.player_list)):
+            coin_hit_list = arcade.check_for_collision_with_list(self.player_list[i], self.scene["Coins"])
+            for coin in coin_hit_list:
+                coin.remove_from_sprite_lists()
+                if i == 0:
+                    self.player.increase_score()
+                else:
+                    self.second_player.increase_score()
+                self.sound_manager.play_sound('coin-collect')
 
         # update timer
         self.total_time += delta_time
@@ -227,25 +226,17 @@ class MyGame(arcade.View):
             if self.countdown_time >= 1:
                 self.sound_manager.play_sound('beep')
                 self.countdown_time = 0
-
-        # check item collision
-        player_collision_list = arcade.check_for_collision_with_lists(self.player, [
-            self.scene["FireItem"],
-            self.scene["BombItem"]
-        ])
-
-        for collision in player_collision_list:
-            if self.scene["FireItem"] in collision.sprite_lists:
-                self.player.activate_fire_shoot()
-            elif self.scene["BombItem"] in collision.sprite_lists:
-                self.player.activate_bomb_shoot()
-            collision.remove_from_sprite_lists()
         
+        for player in self.player_list:
+            # check item collision
+            player_collision_list = arcade.check_for_collision_with_lists(player, [
+                self.scene["FireItem"],
+                self.scene["BombItem"]
+            ])
 
-        if self.player_mode == Playermode.DUO.value:
-            # detect collision with coins 2nd player
-            coin_hit_list = arcade.check_for_collision_with_list(self.second_player_list[0], self.scene["Coins"])
-            for coin in coin_hit_list:
-                coin.remove_from_sprite_lists()
-                self.second_player.increase_score()
-                print(self.second_player.score)
+            for collision in player_collision_list:
+                if self.scene["FireItem"] in collision.sprite_lists:
+                    player.activate_fire_shoot()
+                elif self.scene["BombItem"] in collision.sprite_lists:
+                    player.activate_bomb_shoot()
+                collision.remove_from_sprite_lists()

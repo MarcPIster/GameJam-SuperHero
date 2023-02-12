@@ -45,8 +45,6 @@ class StartWindow(arcade.View):
         )
 
     def on_click_start(self, event):
-        game = MyGame()
-        game.setup()
         self.deactivate()
         playermode = PlayermodeWindow(self.sound_manager, self)
         self.window.show_view(playermode)

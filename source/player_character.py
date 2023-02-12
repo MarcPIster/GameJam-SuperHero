@@ -23,7 +23,7 @@ def load_texture_pair(filename):
 
 
 class Player(arcade.Sprite):
-    def __init__(self, x, y, mode=1, sound_manager):
+    def __init__(self, x, y, sound_manager, mode=1):
         super().__init__()
         self.sound_manager = sound_manager
 
@@ -291,35 +291,6 @@ class Player(arcade.Sprite):
             self.shot = 0
             self.disable_movement = 0
             self.key_shot_pressed = False
-
-    def update_second(self):
-        """ Move the player """
-        # Move player.
-        # Remove these lines if physics engine is moving player.
-        self.on_key_press_second()
-        self.on_key_release_second()
-        
-        self.facing_direction = 0
-
-        if self.disable_movement != 1:
-            if self.key_left_pressed:
-                self.center_x += -self.speed
-                self.facing_direction = 1
-            if self.key_right_pressed:
-                self.center_x += self.speed
-            if self.key_up_pressed:
-                self.center_y += self.jump_height
-
-        # Check for out-of-bounds
-        if self.left < 0:
-            self.left = 0
-        elif self.right > self.screen_width - 1:
-            self.right = self.screen_width - 1
-
-        if self.bottom < 0:
-            self.bottom = 0
-        elif self.top > self.screen_height - 1:
-            self.top = self.screen_height - 1
 
 
     def decrease_health(self, damage):

@@ -51,7 +51,7 @@ class GamemodeWindow(arcade.View):
         self.deactivate()
 
     def on_click_time(self, event):
-        game = MyGame(2, self.mode)
+        game = MyGame(2, self.mode, self.sound_manager)
         game.setup()
         self.window.show_view(game)
         print("Time", event)
