@@ -58,6 +58,7 @@ class Player(arcade.Sprite):
         self.key_right_pressed = False
         self.key_shot_pressed = False
         self.player_mode = mode
+        self.shoot_list = arcade.SpriteList()
 
         # 0 == no
         # 1 == yes
@@ -164,7 +165,6 @@ class Player(arcade.Sprite):
     
     def update(self):
         """ Move the player """
-        print("yes")
         # Move player.
         # Remove these lines if physics engine is moving player.
         if self.player_mode == Playermode.DUO.value:
@@ -188,6 +188,12 @@ class Player(arcade.Sprite):
             self.left = 0
         elif self.right > self.screen_width - 1:
             self.right = self.screen_width - 1
+        
+        for shot in self.shoot_list:
+            if shot.left < 0:
+                shot.remove_from_sprite_lists()
+            elif shot.right > self.screen_width - 1:
+                shot.remove_from_sprite_lists()
 
     def increase_score(self):
         self.score += 1
@@ -263,6 +269,11 @@ class Player(arcade.Sprite):
             self.shot = 0
             self.disable_movement = 0
             self.key_shot_pressed = False
+            laser = arcade.Sprite(self.animShot[0], 1.5)
+            laser.center_x = self.center_x + 50
+            laser.center_y = self.center_y + 10
+            laser.change_x = -10 if self.facing_direction else 10
+            self.shoot_list.append(laser)
 
     def on_key_press_second(self):
         if self.disable_movement == 1:
@@ -281,6 +292,11 @@ class Player(arcade.Sprite):
             self.shot = 1
             self.disable_movement = 1
             self.key_shot_pressed = True
+            laser = arcade.Sprite(self.animShot[0], 1.5)
+            laser.center_x = self.center_x + 50
+            laser.center_y = self.center_y + 10
+            laser.change_x = -10 if self.facing_direction else 10
+            self.shoot_list.append(laser)
 
     def on_key_release_second(self):
         if self.controller.x == False:

@@ -97,7 +97,7 @@ class MyGame(arcade.View):
 
         self.scene.add_sprite_list_before("Player", "Coins")
 
-        self.player = Player(arcade.get_display_size()[0], arcade.get_display_size()[1], self.sound_manager)
+        self.player = Player(self.window.width, self.window.height, self.sound_manager)
         self.player_list = arcade.SpriteList()
         self.player.center_x = 100
         self.player.center_y = 500
@@ -115,7 +115,7 @@ class MyGame(arcade.View):
                                                                         gravity_constant=self.gravity_constant)
 
         if self.player_mode == Playermode.DUO.value:
-            self.second_player = Player(arcade.get_display_size()[0], arcade.get_display_size()[1], self.sound_manager, self.player_mode)
+            self.second_player = Player(self.window.width, self.window.height, self.sound_manager, self.player_mode)
             self.second_player.center_x = 100
             self.second_player.center_y = 500
             self.player_list.append(self.second_player)
@@ -142,6 +142,7 @@ class MyGame(arcade.View):
         for player in self.player_list:
             player.powerups.draw()
             player.bar_list.draw()
+            player.shoot_list.draw()
 
         self.gui_camera.use()
         half_window_width = self.window.width // 2
@@ -192,6 +193,8 @@ class MyGame(arcade.View):
         self.player_list.on_update(delta_time)
         self.player_list.update()
         self.player_list.update_animation(delta_time)
+        for player in self.player_list:
+            player.shoot_list.update()
 
 
         for player in self.player_list:
