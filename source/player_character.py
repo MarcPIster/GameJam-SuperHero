@@ -101,6 +101,7 @@ class Player(arcade.Sprite):
             controllers = pyglet.input.get_controllers()
             if controllers:
                 self.controller = controllers[0]
+                self.controller.close()
                 self.controller.open()
 
     def set_up(self):
@@ -163,6 +164,7 @@ class Player(arcade.Sprite):
     
     def update(self):
         """ Move the player """
+        print("yes")
         # Move player.
         # Remove these lines if physics engine is moving player.
         if self.player_mode == Playermode.DUO.value:
