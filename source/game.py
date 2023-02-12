@@ -143,7 +143,8 @@ class MyGame(arcade.View):
         for player in self.player_list:
             player.powerups.draw()
             player.bar_list.draw()
-            player.shoot_list.draw()
+            for shot in player.shoot_list:
+                shot.sprite.draw()
 
         self.gui_camera.use()
         half_window_width = self.window.width // 2
@@ -195,7 +196,8 @@ class MyGame(arcade.View):
         self.player_list.update()
         self.player_list.update_animation(delta_time)
         for player in self.player_list:
-            player.shoot_list.update()
+            for shot in player.shoot_list:
+                shot.sprite.update()
 
 
         for player in self.player_list:

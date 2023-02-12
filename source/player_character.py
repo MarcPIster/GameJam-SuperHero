@@ -59,7 +59,8 @@ class Player(arcade.Sprite):
         self.key_right_pressed = False
         self.key_shot_pressed = False
         self.player_mode = mode
-        self.shoot_list = arcade.SpriteList()
+        self.shoot_list = []
+        self.shoot_obj = None
 
         # 0 == no
         # 1 == yes
@@ -147,9 +148,9 @@ class Player(arcade.Sprite):
         self.texture = self.walk_textures[0][self.facing_direction]
 
     def on_update(self, delta_time):
-        print(len(self.shoot_list ))
+        print(len(self.shoot_list))
         for shot in self.shoot_list:
-            shot.update()
+            shot.physics_engine.update()
         self.physics_engine.update()
         self.update_energy(delta_time)
 
@@ -194,10 +195,10 @@ class Player(arcade.Sprite):
             self.right = self.screen_width - 1
         
         for shot in self.shoot_list:
-            if shot.left < 0:
-                shot.remove_from_sprite_lists()
+            if shot.sprite.left < 0:
+                shot.sprite.remove_from_sprite_lists()
             elif shot.right > self.screen_width - 1:
-                shot.remove_from_sprite_lists()
+                shot.sprite.remove_from_sprite_lists()
 
     def increase_score(self):
         self.score += 1
@@ -275,15 +276,8 @@ class Player(arcade.Sprite):
             self.key_shot_pressed = False
 
             shot = Shot( self.center_x + 50, self.center_y + 10, -10 if self.facing_direction else 10, 10, self.animShot[0])
-            self.shoot_list.append(shot.sprite)
-
-            try:
-                self.shoot_list[-1].physics_engine = arcade.PhysicsEnginePlatformer(self.shoot_list[-1],
-                                                                            gravity_constant=0.5,
-                                                                    )
-            except:
-                self.shoot_list[-1].physics_engine = arcade.PhysicsEnginePlatformer(self.shoot_list[-1],
-                                                                            gravity_constant=0.5)
+            shot.add_sprite_to_physical_engine()
+            self.shoot_list.append(shot)
 
     def on_key_press_second(self):
         if self.disable_movement == 1:
@@ -302,15 +296,10 @@ class Player(arcade.Sprite):
             self.shot = 1
             self.disable_movement = 1
             self.key_shot_pressed = True
-            shot = Shot(self.center_x + 50, self.center_y + 10, -10 if self.facing_direction else 10, 10,
+            self.shoot_obj = Shot(self.center_x + 50, self.center_y + 10, -10 if self.facing_direction else 10, 10,
                         self.animShot[0])
-            self.shoot_list.append(shot.sprite)
-            try:
-                self.shoot_list[-1].physics_engine = arcade.PhysicsEnginePlatformer(self.shoot_list[-1],
-                                                                            gravity_constant=0.5)
-            except:
-                self.shoot_list[-1].physics_engines = arcade.PhysicsEnginePlatformer(self.shoot_list[-1],
-                                                                            gravity_constant=0.5)
+            self.shoot_obj.add_sprite_to_physical_engine()
+            self.shoot_list.append(self.shoot_obj)
 
 
     def on_key_release_second(self):
