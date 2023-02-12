@@ -1,6 +1,7 @@
 import arcade
 from math import sqrt
 from arcade.examples.sprite_health import IndicatorBar
+from source.shot import Shot
 
 PLAYER_HEALTH = 100
 PLAYER_ENERGY = 100
@@ -20,7 +21,7 @@ def load_texture_pair(filename):
 
 
 class Enemy(arcade.Sprite):
-    def __init__(self, x, y):
+    def __init__(self, x, y, scene):
         super().__init__()
         self.enemy_sprite = arcade.Sprite("./assets/enemy/idle/idle6.png")
         self.enemy_sprite.center_x = 300
@@ -42,6 +43,10 @@ class Enemy(arcade.Sprite):
         self.key_left_pressed = False
         self.key_right_pressed = False
         self.key_shot_pressed = False
+        self.shoot_list = []
+        self.shoot_obj = None
+        self.scene = scene
+        self.shoot_clock = 0
 
         # 0 == no
         # 1 == yes
@@ -136,6 +141,10 @@ class Enemy(arcade.Sprite):
         self.texture = self.walk_textures[0][self.facing_direction]
 
     def on_update(self, delta_time, player_list):
+        self.shoot_clock -= delta_time
+        for shot in self.shoot_list:
+            shot.physics_engine.update()
+
         self.physics_engine.update()
         self.decide_movement(player_list)
 
@@ -168,6 +177,14 @@ class Enemy(arcade.Sprite):
             self.bottom = 0
         elif self.top > self.screen_height - 1:
             self.top = self.screen_height - 1
+
+        for shot in self.shoot_list:
+            if shot.sprite.left < 0:
+                shot.sprite.remove_from_sprite_lists()
+            elif shot.sprite.right > self.screen_width - 1:
+                shot.sprite.remove_from_sprite_lists()
+                self.shoot_list.remove(shot)
+                del shot
 
     def update_animation(self, delta_time):
         self.deltaAnimTime += delta_time
@@ -250,5 +267,18 @@ class Enemy(arcade.Sprite):
 
         self.indicator_bar.fullness = (self.health / PLAYER_HEALTH)
 
+    def create_germ(self, jumpiness):
+        self.shoot_obj = Shot(self.center_x + 50, self.center_y + 10, -5 if self.shoot_direction else 5, jumpiness, 10,
+                              self.animShot[0],
+                              self.scene, 0.04)
+        self.shoot_obj.add_sprite_to_physical_engine()
+        self.shoot_list.append(self.shoot_obj)
+
     def shoot(self):
-        print("Imagine enemy shooting here")
+        if self.shoot_clock > 0:
+            return
+        self.create_germ(0)
+        self.create_germ(2.5)
+        self.create_germ(5)
+        self.shoot_clock = 0.8
+

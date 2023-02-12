@@ -120,8 +120,8 @@ class MyGame(arcade.View):
 
         self.enemy_list = arcade.SpriteList()
         if self.player_mode == 1:
-            self.enemy = Enemy(arcade.get_display_size()[0], arcade.get_display_size()[1])
-            self.enemy.center_x = 300
+            self.enemy = Enemy(arcade.get_display_size()[0], arcade.get_display_size()[1], self.scene)
+            self.enemy.center_x = 500
             self.enemy.center_y = 500
             self.enemy_list.append(self.enemy)
             self.scene.add_sprite("Enemy", self.enemy_list[0])
@@ -179,6 +179,8 @@ class MyGame(arcade.View):
                 shot.sprite.draw()
         if self.player_mode == 1:
             self.enemy.bar_list.draw()
+            for shot in self.enemy.shoot_list:
+                shot.sprite.draw()
 
         self.gui_camera.use()
         half_window_width = self.window.width // 2
@@ -225,6 +227,31 @@ class MyGame(arcade.View):
         self.game_over = True
         self.window.show_view(EndWindow(self))
 
+    def check_bullet_collision(self, player):
+        for shot in player.shoot_list:
+            shot.sprite.update()
+            hit_list = arcade.check_for_collision_with_list(shot.sprite, self.player_list)
+            if len(self.enemy_list) > 0:
+                hit_list.extend(arcade.check_for_collision_with_list(shot.sprite, self.enemy_list))
+
+            if len(hit_list) > 0:
+                shot.sprite.remove_from_sprite_lists()
+                for player in hit_list:
+                    player.decrease_health(20)
+
+    def stop_bullets_on_collision(self, shot):
+        if shot.hit:
+            return
+        if self.level == 4:
+            shoot_collision_list = arcade.check_for_collision_with_lists(shot.sprite, [self.scene["Platforms"],
+                                                                                       self.scene["Moving Platforms"]])
+        else:
+            shoot_collision_list = arcade.check_for_collision_with_lists(shot.sprite,
+                                                                         [self.scene["Platforms"]])
+        if len(shoot_collision_list) > 0:
+            shot.set_speed(0)
+            shot.hit = True
+
     def on_update(self, delta_time):
         self.player_list.on_update(delta_time)
         self.player_list.update()
@@ -236,17 +263,9 @@ class MyGame(arcade.View):
             self.enemy_list.update_animation(delta_time)
 
         for player in self.player_list:
-            for shot in player.shoot_list:
-                shot.sprite.update()
-                hit_list = arcade.check_for_collision_with_list(shot.sprite, self.player_list)
-                if len(self.enemy_list) > 0:
-                    hit_list.extend(arcade.check_for_collision_with_list(shot.sprite, self.enemy_list))
-
-                if len(hit_list) > 0:
-                    shot.sprite.remove_from_sprite_lists()
-                    for player in hit_list:
-                        player.decrease_health(20)
-
+            self.check_bullet_collision(player)
+        for enemy in self.enemy_list:
+            self.check_bullet_collision(enemy)
 
         for player in self.player_list:
             if player.health <= 0:
@@ -281,6 +300,10 @@ class MyGame(arcade.View):
                 if self.countdown_time >= 1:
                     self.sound_manager.play_sound('beep')
                     self.countdown_time = 0
+
+        for enemy in self.enemy_list:
+            for shot in enemy.shoot_list:
+                self.stop_bullets_on_collision(shot)
         
         for player in self.player_list:
             # check item collision
@@ -289,17 +312,7 @@ class MyGame(arcade.View):
                 self.scene["BombItem"]
             ])
             for shot in player.shoot_list:
-                if shot.hit:
-                    continue
-                if self.level == 4:
-                    shoot_collision_list = arcade.check_for_collision_with_lists(shot.sprite, [self.scene["Platforms"],
-                                                                                            self.scene["Moving Platforms"]])
-                else:
-                    shoot_collision_list = arcade.check_for_collision_with_lists(shot.sprite,
-                                                                                 [self.scene["Platforms"]])
-                if len(shoot_collision_list) > 0:
-                    shot.set_speed(0)
-                    shot.hit = True
+                self.stop_bullets_on_collision(shot)
 
             for collision in player_collision_list:
                 if self.scene["FireItem"] in collision.sprite_lists:
