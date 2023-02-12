@@ -4,6 +4,7 @@ from source.game import MyGame
 from source.menus.playermode_screen import PlayermodeWindow
 from source.menus.setting_screen import SettingsWindow
 
+
 class StartWindow(arcade.View):
     def __init__(self, sound_manager):
         super().__init__()
@@ -35,9 +36,6 @@ class StartWindow(arcade.View):
         self.v_box.add(quit_button)
         quit_button.on_click = self.on_click_quit
 
-
-
-
         # Create a widget to hold the v_box widget, that will center the buttons
         self.manager.add(
             arcade.gui.UIAnchorWidget(
@@ -47,6 +45,8 @@ class StartWindow(arcade.View):
         )
 
     def on_click_start(self, event):
+        game = MyGame()
+        game.setup()
         self.deactivate()
         playermode = PlayermodeWindow(self.sound_manager, self)
         self.window.show_view(playermode)

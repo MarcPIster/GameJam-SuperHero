@@ -15,7 +15,10 @@ class SoundManager:
         self.sound_list[sound_name] = arcade.load_sound(sound_file)
 
     def play_sound(self, sound_name):
-        player = arcade.play_sound(self.sound_list[sound_name], self.volume_sound)
+        if sound_name == "item-collect":
+            player = arcade.play_sound(self.sound_list[sound_name], self.volume_sound, speed=2)
+        else:
+            player = arcade.play_sound(self.sound_list[sound_name], self.volume_sound)
         self.player_sound[sound_name] = player
         return player
 
@@ -54,3 +57,13 @@ class SoundManager:
             player.volume = volume
     def get_sound_manager(self):
         return self
+
+    def stop_all_sounds(self):
+        for player in self.player_sound.values():
+            arcade.stop_sound(player)
+        self.player_sound = {}
+
+    def stop_all_music(self):
+        for player in self.player_music.values():
+            arcade.stop_sound(player)
+        self.player_music = {}
