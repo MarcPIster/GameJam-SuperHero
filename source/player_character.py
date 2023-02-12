@@ -2,7 +2,7 @@ import random
 
 import arcade
 import pyglet
-from source.game_mode import Gamemode,Playermode
+from source.game_mode import Playermode
 from arcade.examples.sprite_health import IndicatorBar
 from source.shot import Shot
 
@@ -28,7 +28,6 @@ class Player(arcade.Sprite):
         super().__init__()
         self.sound_manager = sound_manager
 
-
         self.player_sprite = arcade.Sprite("./assets/player/walk/walk0.png", 1.5)
         self.player_sprite.center_x = 100
         self.player_sprite.center_y = 500
@@ -39,11 +38,12 @@ class Player(arcade.Sprite):
         self.speed = 4
         self.score = 0
         self.jump_height = 10
-        self.shot_damage = 20
+        self.shot_damage = 10
 
         self.hasFireShoot = False
         self.hasBombShoot = False
         self.powerups = arcade.SpriteList()
+        self.energy_reload = 1
 
         self.health = PLAYER_HEALTH
         self.energy = PLAYER_ENERGY
@@ -175,7 +175,6 @@ class Player(arcade.Sprite):
         if self.player_mode == Playermode.DUO.value:
             self.on_key_press_second()
             self.on_key_release_second()
-        
 
         if self.disable_movement != 1:
             if self.key_left_pressed:
@@ -187,12 +186,16 @@ class Player(arcade.Sprite):
             if self.key_up_pressed:
                 self.center_y += self.jump_height
 
-
         # Check for out-of-bounds
         if self.left < 0:
             self.left = 0
         elif self.right > self.screen_width - 1:
             self.right = self.screen_width - 1
+
+        if self.bottom < 0:
+            self.center_y = 500
+            self.center_x = 100
+            self.decrease_health(20)
         
         for shot in self.shoot_list:
             if shot.sprite.left < 0:
@@ -275,7 +278,9 @@ class Player(arcade.Sprite):
                 self.shot = 0
                 self.disable_movement = 0
                 self.key_shot_pressed = False
-                self.shoot_obj = Shot(self.center_x - 50 if self.facing_direction else self.center_x + 50, self.center_y + 10, -10 if self.facing_direction else 10, 0, 10, self.animShot[0], self.scene)
+                self.shoot_obj = Shot(self.center_x - 50 if self.facing_direction else self.center_x + 50,
+                                      self.center_y + 10, -10 if self.facing_direction else 10, 0, self.shot_damage,
+                                      self.animShot[0], self.scene)
                 self.shoot_obj.add_sprite_to_physical_engine()
                 self.shoot_list.append(self.shoot_obj)
 
@@ -297,9 +302,9 @@ class Player(arcade.Sprite):
                 self.shot = 1
                 self.disable_movement = 1
                 self.key_shot_pressed = True
-                self.shoot_obj = Shot(self.center_x - 50 if self.facing_direction else self.center_x + 50, self.center_y + 10, -10 if self.facing_direction else 10, 0, 10,
-                            self.animShot[0],
-                                      self.scene)
+                self.shoot_obj = Shot(self.center_x - 50 if self.facing_direction else self.center_x + 50,
+                                      self.center_y + 10, -10 if self.facing_direction else 10, 0, self.shot_damage,
+                                      self.animShot[0], self.scene)
                 self.shoot_obj.add_sprite_to_physical_engine()
                 self.shoot_list.append(self.shoot_obj)
                 self.shoot(10)
@@ -337,20 +342,22 @@ class Player(arcade.Sprite):
         if self.hasFireShoot:
             return
         self.hasFireShoot = True
+        self.energy_reload = 0.5
         self.sound_manager.play_sound("item-collect")
-        sprite = arcade.Sprite("./assets/powerups/Fire.png", 0.14)
+        sprite = arcade.Sprite("./assets/powerups/Speed.png", 0.14)
         self.powerups.append(sprite)
 
     def activate_bomb_shoot(self):
         if self.hasBombShoot:
             return
         self.hasBombShoot = True
+        self.shot_damage += 10
         self.sound_manager.play_sound("item-collect")
         sprite = arcade.Sprite("./assets/powerups/Bomb.png", 0.14)
         self.powerups.append(sprite)
 
     def update_energy(self, delta_time):
-        if self.energy_timer > 1:
+        if self.energy_timer > self.energy_reload:
             self.energy_timer = 0
             self.energy += 5
             if self.energy > PLAYER_ENERGY:

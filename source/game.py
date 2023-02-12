@@ -6,7 +6,7 @@ from source.enemy_character import Enemy
 from source.maps.map_manager import MapManager
 from source.menus.pause_screen import PauseManager
 from source.game_mode import Gamemode, Playermode
-from random import seed, randint, randrange
+from random import randrange
 
 # LAYER order:
 # 1: Platforms
@@ -49,7 +49,6 @@ class MyGame(arcade.View):
 
         self.gui_camera = arcade.Camera(self.window.width, self.window.height)
         self.total_time = 0.0
-        self.time_past = 0.0
         self.countdown_time = 0
         if game_mode == Gamemode.TIME:
             self.timer_text = arcade.Text(
@@ -129,7 +128,7 @@ class MyGame(arcade.View):
         for i in range(5):
             self.random_bat_spawn.append(randrange(1, 119))
         if self.player_mode == 1:
-            self.enemy = Enemy(arcade.get_display_size()[0], arcade.get_display_size()[1], self.scene)
+            self.enemy = Enemy(arcade.get_display_size()[0], arcade.get_display_size()[1], self.sound_manager, self.scene)
             self.enemy.center_x = 500
             self.enemy.center_y = 500
             self.enemy_list.append(self.enemy)
