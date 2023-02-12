@@ -109,11 +109,21 @@ class MyGame(arcade.View):
         self.scene.add_sprite("Player", self.player_list[0])
 
         self.enemy_list = arcade.SpriteList()
-        self.enemy = Enemy(arcade.get_display_size()[0], arcade.get_display_size()[1])
-        self.enemy.center_x = 300
-        self.enemy.center_y = 500
-        self.enemy_list.append(self.enemy)
-        self.scene.add_sprite("Enemy", self.enemy_list[0])
+        if self.player_mode == 1:
+            self.enemy = Enemy(arcade.get_display_size()[0], arcade.get_display_size()[1])
+            self.enemy.center_x = 300
+            self.enemy.center_y = 500
+            self.enemy_list.append(self.enemy)
+            self.scene.add_sprite("Enemy", self.enemy_list[0])
+            if self.moving_platforms:
+                self.enemy.physics_engine = arcade.PhysicsEnginePlatformer(self.enemy_list[0],
+                                                                           platforms=self.scene["Moving Platforms"],
+                                                                           walls=self.scene["Platforms"],
+                                                                           gravity_constant=self.gravity_constant)
+            else:
+                self.enemy.physics_engine = arcade.PhysicsEnginePlatformer(self.enemy_list[0],
+                                                                           walls=self.scene["Platforms"],
+                                                                           gravity_constant=self.gravity_constant)
 
         try:
             self.player.physics_engine = arcade.PhysicsEnginePlatformer(self.player_list[0],
@@ -142,17 +152,6 @@ class MyGame(arcade.View):
                                                                             walls=self.scene["Platforms"],
                                                                             gravity_constant=self.gravity_constant)
 
-
-        if self.moving_platforms:
-            self.enemy.physics_engine = arcade.PhysicsEnginePlatformer(self.enemy_list[0],
-                                                                        platforms=self.scene["Moving Platforms"],
-                                                                        walls=self.scene["Platforms"],
-                                                                        gravity_constant=self.gravity_constant)
-        else:
-            self.enemy.physics_engine = arcade.PhysicsEnginePlatformer(self.enemy_list[0],
-                                                                        walls=self.scene["Platforms"],
-                                                                        gravity_constant=self.gravity_constant)
-
     def on_show_view(self):
         """ This is run once when we switch to this view """
         arcade.set_viewport(0, self.window.width, 0, self.window.height)
@@ -164,7 +163,8 @@ class MyGame(arcade.View):
         for player in self.player_list:
             player.powerups.draw()
             player.bar_list.draw()
-        self.enemy.bar_list.draw()
+        if self.player_mode == 1:
+            self.enemy.bar_list.draw()
 
         self.gui_camera.use()
         half_window_width = self.window.width // 2
@@ -215,9 +215,10 @@ class MyGame(arcade.View):
         self.player_list.update()
         self.player_list.update_animation(delta_time)
 
-        self.enemy.on_update(delta_time, self.player_list)
-        self.enemy_list.update()
-        self.enemy_list.update_animation(delta_time)
+        if self.player_mode == 1:
+            self.enemy.on_update(delta_time, self.player_list)
+            self.enemy_list.update()
+            self.enemy_list.update_animation(delta_time)
 
         for player in self.player_list:
             if player.health <= 0:
