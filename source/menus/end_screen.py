@@ -22,13 +22,19 @@ class EndWindow(arcade.View):
         # Create a vertical BoxGroup to align buttons
         self.v_box = arcade.gui.UIBoxLayout()
 
+        won_text = ""
+        if self.game_view.player_won is not None:
+            won_text = f"Player {self.game_view.player_won + 1} won!"
+        else:
+            won_text = "You lost against the virus!"
+
         # add text "Game Over" to v_box
         self.v_box.add(arcade.gui.UILabel(
             x=self.window.width - 100,
             y=self.window.height,
             text_color=arcade.color.WHITE,
             font_size=30,
-            text=f"Player {self.game_view.player_won + 1} won!",
+            text=won_text,
             height=80,
         ))
 

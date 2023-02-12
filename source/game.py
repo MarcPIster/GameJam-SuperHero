@@ -79,13 +79,11 @@ class MyGame(arcade.View):
         self.sound_manager.add_sound(f'hurt-3', f'./assets/sounds/hurt3.wav')
         self.sound_manager.add_sound(f'hurt-4', f'./assets/sounds/hurt4.wav')
 
-
     def setup(self, level=1):
         """ Set up the game here. Call this function to restart the game. """
         self.game_over = False
         self.load_level(level)
         self.total_time = 0.0
-
 
     def load_level(self, level_id):
         self.moving_platforms = False
@@ -104,10 +102,8 @@ class MyGame(arcade.View):
             self.sound_manager.add_music('maintheme', './assets/sounds/theme.wav')
             self.sound_manager.play_music('maintheme')
 
-
         self.moving_platforms = False
         self.scene = arcade.Scene.from_tilemap(self.map_manager.load_level(level_id))
-
 
         self.scene.add_sprite_list_before("Player", "Coins")
 
@@ -207,23 +203,25 @@ class MyGame(arcade.View):
             self.load_level(4)
         self.player.on_key_press(key, modifiers)
 
-
     def on_key_release(self, key, modifiers):
         self.player.on_key_release(key, modifiers)
 
         self.pause_manager.on_key_press(key, self)
 
-    def end_game(self):
-        tmp = 0
-        tmp_x = 0
-        for x in range(len(self.player_list)):
-            if self.player_list[x].score > tmp:
-                tmp = self.player_list[x].score
-                tmp_x = x
-        self.player_won = tmp_x
-        for x in range(len(self.player_list)):
-            if self.player_list[x].health > 0:
-                self.player_won = x
+    def end_game(self, enemy_won=None):
+        if enemy_won != True:
+            tmp = 0
+            tmp_x = 0
+            for x in range(len(self.player_list)):
+                if self.player_list[x].score > tmp:
+                    tmp = self.player_list[x].score
+                    tmp_x = x
+            self.player_won = tmp_x
+            for x in range(len(self.player_list)):
+                if self.player_list[x].health > 0:
+                    self.player_won = x
+        else:
+            self.player_won = None
         self.game_over = True
         self.window.show_view(EndWindow(self))
 
@@ -276,7 +274,14 @@ class MyGame(arcade.View):
 
         for player in self.player_list:
             if player.health <= 0:
-                self.end_game()
+                if len(self.enemy_list) > 0:
+                    self.end_game(True)
+                else:
+                    self.end_game()
+
+        if len(self.enemy_list) > 0:
+            if self.enemy_list[0].health <= 0:
+                self.end_game(False)
 
         if self.moving_platforms:
             self.scene.update(["Moving Platforms"])
