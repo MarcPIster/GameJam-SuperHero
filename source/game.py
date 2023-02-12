@@ -195,6 +195,13 @@ class MyGame(arcade.View):
         self.player_list.update_animation(delta_time)
         for player in self.player_list:
             player.shoot_list.update()
+            for shot in player.shoot_list:
+                hit_list = arcade.check_for_collision_with_list(shot, self.player_list)
+
+                if len(hit_list) > 0:
+                    shot.remove_from_sprite_lists()
+                    for player in hit_list:
+                        player.decrease_health(20)
 
 
         for player in self.player_list:

@@ -27,7 +27,6 @@ class Player(arcade.Sprite):
         super().__init__()
         self.sound_manager = sound_manager
 
-
         self.player_sprite = arcade.Sprite("./assets/player/walk/walk0.png", 1.5)
         self.player_sprite.center_x = 100
         self.player_sprite.center_y = 500
@@ -38,6 +37,7 @@ class Player(arcade.Sprite):
         self.speed = 4
         self.score = 0
         self.jump_height = 10
+        self.shot_damage = 20
 
         self.hasFireShoot = False
         self.hasBombShoot = False
@@ -209,10 +209,7 @@ class Player(arcade.Sprite):
             self.cur_texture += 1
             if self.cur_texture > 1:
                 self.cur_texture = 0
-            if self.key_left_pressed:
-                self.texture = self.shoot_texture[self.cur_texture][1]
-            else:
-                self.texture = self.shoot_texture[self.cur_texture][0]
+            self.texture = self.shoot_texture[self.cur_texture][self.facing_direction]
             self.deltaAnimTime = 0
             return 
         
@@ -269,11 +266,11 @@ class Player(arcade.Sprite):
             self.shot = 0
             self.disable_movement = 0
             self.key_shot_pressed = False
-            laser = arcade.Sprite(self.animShot[0], 1.5)
-            laser.center_x = self.center_x + 50
-            laser.center_y = self.center_y + 10
-            laser.change_x = -10 if self.facing_direction else 10
-            self.shoot_list.append(laser)
+            shot = arcade.Sprite(self.animShot[0], 1.5)
+            shot.center_x = self.center_x - 50 if self.facing_direction else self.center_x + 50
+            shot.center_y = self.center_y + 10
+            shot.change_x = -10 if self.facing_direction else 10
+            self.shoot_list.append(shot)
 
     def on_key_press_second(self):
         if self.disable_movement == 1:
@@ -292,11 +289,12 @@ class Player(arcade.Sprite):
             self.shot = 1
             self.disable_movement = 1
             self.key_shot_pressed = True
-            laser = arcade.Sprite(self.animShot[0], 1.5)
-            laser.center_x = self.center_x + 50
-            laser.center_y = self.center_y + 10
-            laser.change_x = -10 if self.facing_direction else 10
-            self.shoot_list.append(laser)
+            shot = arcade.Sprite(self.animShot[0], 1.5)
+            shot.center_x = self.center_x - 50 if self.facing_direction else self.center_x + 50
+            shot.center_y = self.center_y
+            shot.change_x = -10 if self.facing_direction else 10
+            self.shoot_list.append(shot)
+
 
     def on_key_release_second(self):
         if self.controller.x == False:
