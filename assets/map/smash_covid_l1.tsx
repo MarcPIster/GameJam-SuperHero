@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<tileset version="1.9" tiledversion="1.9.2" name="smash_covid_l1" tilewidth="128" tileheight="128" tilecount="21" columns="0">
+<tileset version="1.9" tiledversion="1.9.2" name="smash_covid_l1" tilewidth="128" tileheight="128" tilecount="22" columns="0">
  <grid orientation="orthogonal" width="1" height="1"/>
  <tile id="13">
   <image width="128" height="128" source="boxCrate_double.png"/>
@@ -63,5 +63,8 @@
  </tile>
  <tile id="35">
   <image width="128" height="128" source="../powerups/Fire.png"/>
+ </tile>
+ <tile id="36">
+  <image width="128" height="128" source="../powerups/Speed.png"/>
  </tile>
 </tileset>

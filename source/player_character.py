@@ -38,11 +38,12 @@ class Player(arcade.Sprite):
         self.speed = 4
         self.score = 0
         self.jump_height = 10
-        self.shot_damage = 20
+        self.shot_damage = 10
 
         self.hasFireShoot = False
         self.hasBombShoot = False
         self.powerups = arcade.SpriteList()
+        self.energy_reload = 1
 
         self.health = PLAYER_HEALTH
         self.energy = PLAYER_ENERGY
@@ -277,7 +278,9 @@ class Player(arcade.Sprite):
                 self.shot = 0
                 self.disable_movement = 0
                 self.key_shot_pressed = False
-                self.shoot_obj = Shot(self.center_x - 50 if self.facing_direction else self.center_x + 50, self.center_y + 10, -10 if self.facing_direction else 10, 0, 10, self.animShot[0], self.scene)
+                self.shoot_obj = Shot(self.center_x - 50 if self.facing_direction else self.center_x + 50,
+                                      self.center_y + 10, -10 if self.facing_direction else 10, 0, self.shot_damage,
+                                      self.animShot[0], self.scene)
                 self.shoot_obj.add_sprite_to_physical_engine()
                 self.shoot_list.append(self.shoot_obj)
 
@@ -299,9 +302,9 @@ class Player(arcade.Sprite):
                 self.shot = 1
                 self.disable_movement = 1
                 self.key_shot_pressed = True
-                self.shoot_obj = Shot(self.center_x - 50 if self.facing_direction else self.center_x + 50, self.center_y + 10, -10 if self.facing_direction else 10, 0, 10,
-                            self.animShot[0],
-                                      self.scene)
+                self.shoot_obj = Shot(self.center_x - 50 if self.facing_direction else self.center_x + 50,
+                                      self.center_y + 10, -10 if self.facing_direction else 10, 0, self.shot_damage,
+                                      self.animShot[0], self.scene)
                 self.shoot_obj.add_sprite_to_physical_engine()
                 self.shoot_list.append(self.shoot_obj)
                 self.shoot(10)
@@ -339,20 +342,22 @@ class Player(arcade.Sprite):
         if self.hasFireShoot:
             return
         self.hasFireShoot = True
+        self.energy_reload = 0.5
         self.sound_manager.play_sound("item-collect")
-        sprite = arcade.Sprite("./assets/powerups/Fire.png", 0.14)
+        sprite = arcade.Sprite("./assets/powerups/Speed.png", 0.14)
         self.powerups.append(sprite)
 
     def activate_bomb_shoot(self):
         if self.hasBombShoot:
             return
         self.hasBombShoot = True
+        self.shot_damage += 10
         self.sound_manager.play_sound("item-collect")
         sprite = arcade.Sprite("./assets/powerups/Bomb.png", 0.14)
         self.powerups.append(sprite)
 
     def update_energy(self, delta_time):
-        if self.energy_timer > 1:
+        if self.energy_timer > self.energy_reload:
             self.energy_timer = 0
             self.energy += 5
             if self.energy > PLAYER_ENERGY:
