@@ -125,8 +125,9 @@ class MyGame(arcade.View):
                                                                                    gravity_constant=self.gravity_constant)
             except KeyError:
                 self.second_player.physics_engine = arcade.PhysicsEnginePlatformer(self.player_list[1],
-                                                                                   walls=self.scene["Platforms"],
-                                                                                   gravity_constant=self.gravity_constant)
+                                                                            walls=self.scene["Platforms"],
+                                                                            gravity_constant=self.gravity_constant)
+                                                        
 
     def on_show_view(self):
         """ This is run once when we switch to this view """
@@ -194,6 +195,15 @@ class MyGame(arcade.View):
         for player in self.player_list:
             for shot in player.shoot_list:
                 shot.sprite.update()
+                hit_list = arcade.check_for_collision_with_list(shot.sprite, self.player_list)
+
+                if len(hit_list) > 0:
+                    shot.sprite.remove_from_sprite_lists()
+                    for player in hit_list:
+                        player.decrease_health(20)
+
+
+        for player in self.player_list:
             if player.health <= 0:
                 self.end_game()
 
@@ -225,7 +235,7 @@ class MyGame(arcade.View):
             if self.countdown_time >= 1:
                 self.sound_manager.play_sound('beep')
                 self.countdown_time = 0
-
+        
         for player in self.player_list:
             # check item collision
             player_collision_list = arcade.check_for_collision_with_lists(player, [

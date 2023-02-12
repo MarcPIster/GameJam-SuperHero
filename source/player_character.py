@@ -39,6 +39,7 @@ class Player(arcade.Sprite):
         self.speed = 4
         self.score = 0
         self.jump_height = 10
+        self.shot_damage = 20
 
         self.hasFireShoot = False
         self.hasBombShoot = False
@@ -217,10 +218,7 @@ class Player(arcade.Sprite):
             self.cur_texture += 1
             if self.cur_texture > 1:
                 self.cur_texture = 0
-            if self.key_left_pressed:
-                self.texture = self.shoot_texture[self.cur_texture][1]
-            else:
-                self.texture = self.shoot_texture[self.cur_texture][0]
+            self.texture = self.shoot_texture[self.cur_texture][self.facing_direction]
             self.deltaAnimTime = 0
             return 
         

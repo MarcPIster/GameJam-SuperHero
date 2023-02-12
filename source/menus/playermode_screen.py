@@ -1,4 +1,5 @@
 import arcade
+import pyglet
 from source.menus.gamemode_screen import GamemodeWindow
 
 class PlayermodeWindow(arcade.View):
@@ -22,10 +23,16 @@ class PlayermodeWindow(arcade.View):
         solo_button = arcade.gui.UIFlatButton(text="Soloplayer", width=200)
         self.v_box.add(solo_button.with_space_around(bottom=20))
         solo_button.on_click = self.on_click_solo
+        
+        duo = False
+        controllers = pyglet.input.get_controllers()
+        if controllers:
+            duo = True
 
-        duo_button = arcade.gui.UIFlatButton(text="1 vs 1 (lokal)", width=200)
+        duo_button = arcade.gui.UIFlatButton(text="1 vs 1 (lokal)", width=200) if duo else arcade.gui.UIFlatButton(text="1 vs 1 (lokal)", width=200, style={"font_color": arcade.color.GRAY, "bg_color_pressed": (21, 19, 21), "font_color_pressed": arcade.color.GRAY, "border_color_pressed": (21, 19, 21)})
         self.v_box.add(duo_button.with_space_around(bottom=20))
-        duo_button.on_click = self.on_click_duo
+        if duo:
+            duo_button.on_click = self.on_click_duo
 
         back_button = arcade.gui.UIFlatButton(text="Back", width=200)
         self.v_box.add(back_button)
