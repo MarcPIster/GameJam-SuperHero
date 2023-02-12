@@ -164,7 +164,6 @@ class Player(arcade.Sprite):
     
     def update(self):
         """ Move the player """
-        print("yes")
         # Move player.
         # Remove these lines if physics engine is moving player.
         if self.player_mode == Playermode.DUO.value:
