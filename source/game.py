@@ -4,7 +4,7 @@ from source.menus.end_screen import EndWindow
 from source.player_character import Player
 from source.maps.map_manager import MapManager
 from source.menus.pause_screen import PauseManager
-from source.game_mode import Gamemode,Playermode
+from source.game_mode import Gamemode, Playermode
 
 # LAYER order:
 # 1: Platforms
@@ -66,13 +66,11 @@ class MyGame(arcade.View):
         self.sound_manager.add_sound(f'hurt-3', f'./assets/sounds/hurt3.wav')
         self.sound_manager.add_sound(f'hurt-4', f'./assets/sounds/hurt4.wav')
 
-
     def setup(self, level=1):
         """ Set up the game here. Call this function to restart the game. """
         self.game_over = False
         self.load_level(level)
         self.total_time = 0.0
-
 
     def load_level(self, level_id):
         self.level = level_id
@@ -90,10 +88,8 @@ class MyGame(arcade.View):
             self.sound_manager.add_music('maintheme', './assets/sounds/theme.wav')
             self.sound_manager.play_music('maintheme')
 
-
         self.moving_platforms = False
         self.scene = arcade.Scene.from_tilemap(self.map_manager.load_level(level_id))
-
 
         self.scene.add_sprite_list_before("Player", "Coins")
 
@@ -114,7 +110,6 @@ class MyGame(arcade.View):
                                                                         walls=self.scene["Platforms"],
                                                                         gravity_constant=self.gravity_constant)
 
-
         if self.player_mode == Playermode.DUO.value:
             self.second_player = Player(self.window.width, self.window.height, self.sound_manager, self.player_mode,
                                         self.scene)
@@ -124,14 +119,14 @@ class MyGame(arcade.View):
             self.scene.add_sprite("Player2", self.player_list[1])
             try:
                 self.second_player.physics_engine = arcade.PhysicsEnginePlatformer(self.player_list[1],
-                                                                            platforms=self.scene["Moving Platforms"],
-                                                                            walls=self.scene["Platforms"],
-                                                                            gravity_constant=self.gravity_constant)
+                                                                                   platforms=self.scene[
+                                                                                       "Moving Platforms"],
+                                                                                   walls=self.scene["Platforms"],
+                                                                                   gravity_constant=self.gravity_constant)
             except KeyError:
                 self.second_player.physics_engine = arcade.PhysicsEnginePlatformer(self.player_list[1],
-                                                                            walls=self.scene["Platforms"],
-                                                                            gravity_constant=self.gravity_constant)
-                                                        
+                                                                                   walls=self.scene["Platforms"],
+                                                                                   gravity_constant=self.gravity_constant)
 
     def on_show_view(self):
         """ This is run once when we switch to this view """
@@ -172,7 +167,6 @@ class MyGame(arcade.View):
             self.load_level(4)
         self.player.on_key_press(key, modifiers)
 
-
     def on_key_release(self, key, modifiers):
         self.player.on_key_release(key, modifiers)
 
@@ -197,17 +191,9 @@ class MyGame(arcade.View):
         self.player_list.update()
         self.player_list.update_animation(delta_time)
 
-
         for player in self.player_list:
             for shot in player.shoot_list:
                 shot.sprite.update()
-
-#        for player in self.player_list:
-#            for shot in player.shoot_list:
-#                shot.sprite.update()
-
-
-        for player in self.player_list:
             if player.health <= 0:
                 self.end_game()
 
@@ -239,13 +225,25 @@ class MyGame(arcade.View):
             if self.countdown_time >= 1:
                 self.sound_manager.play_sound('beep')
                 self.countdown_time = 0
-        
+
         for player in self.player_list:
             # check item collision
             player_collision_list = arcade.check_for_collision_with_lists(player, [
                 self.scene["FireItem"],
                 self.scene["BombItem"]
             ])
+            for shot in player.shoot_list:
+                if shot.hit:
+                    continue
+                if self.level == 4:
+                    shoot_collision_list = arcade.check_for_collision_with_lists(shot.sprite, [self.scene["Platforms"],
+                                                                                            self.scene["Moving Platforms"]])
+                else:
+                    shoot_collision_list = arcade.check_for_collision_with_lists(shot.sprite,
+                                                                                 [self.scene["Platforms"]])
+                if len(shoot_collision_list) > 0:
+                    shot.set_speed(0)
+                    shot.hit = True
 
             for collision in player_collision_list:
                 if self.scene["FireItem"] in collision.sprite_lists:
