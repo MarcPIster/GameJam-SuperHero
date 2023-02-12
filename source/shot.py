@@ -12,6 +12,8 @@ class Shot:
         self.physics_engine = None
         self.scene = scene
         self.hit = False
+        self.total_time = 3
+        self.time_went_by = 0
 
     def add_sprite_to_physical_engine(self):
         try:

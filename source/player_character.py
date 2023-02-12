@@ -295,11 +295,12 @@ class Player(arcade.Sprite):
             self.shot = 1
             self.disable_movement = 1
             self.key_shot_pressed = True
-            self.shoot_obj = Shot(self.center_x + 50, self.center_y + 10, -10 if self.facing_direction else 10, 10,
+            self.shoot_obj = Shot(self.center_x -50 if self.facing_direction else self.center_x + 50, self.center_y + 10, -10 if self.facing_direction else 10, 10,
                         self.animShot[0],
                                   self.scene)
             self.shoot_obj.add_sprite_to_physical_engine()
             self.shoot_list.append(self.shoot_obj)
+            self.shoot(10)
 
 
     def on_key_release_second(self):
