@@ -1,5 +1,6 @@
 import arcade
 import pyglet
+import os
 from source.menus.gamemode_screen import GamemodeWindow
 
 class PlayermodeWindow(arcade.View):
@@ -25,7 +26,11 @@ class PlayermodeWindow(arcade.View):
         solo_button.on_click = self.on_click_solo
         
         duo = False
-        controllers = pyglet.input.get_controllers()
+        #check os system and if mac
+        if os.name == "posix":
+            controllers = pyglet.input.get_devices() # for macos
+        else:
+            controllers = pyglet.input.get_controllers()
         if controllers:
             duo = True
 
