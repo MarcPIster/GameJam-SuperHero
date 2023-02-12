@@ -44,7 +44,7 @@ class GamemodeWindow(arcade.View):
         )
 
     def on_click_timeless(self, event):
-        game = MyGame(1, self.mode)
+        game = MyGame(1, self.mode, self.sound_manager)
         game.setup()
         self.window.show_view(game)
         print("Timeless", event)
