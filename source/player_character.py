@@ -2,7 +2,7 @@ import random
 
 import arcade
 import pyglet
-from source.game_mode import Gamemode,Playermode
+from source.game_mode import Playermode
 from arcade.examples.sprite_health import IndicatorBar
 from source.shot import Shot
 
@@ -27,7 +27,6 @@ class Player(arcade.Sprite):
     def __init__(self, x, y, sound_manager, scene ,mode=1):
         super().__init__()
         self.sound_manager = sound_manager
-
 
         self.player_sprite = arcade.Sprite("./assets/player/walk/walk0.png", 1.5)
         self.player_sprite.center_x = 100
@@ -175,7 +174,6 @@ class Player(arcade.Sprite):
         if self.player_mode == Playermode.DUO.value:
             self.on_key_press_second()
             self.on_key_release_second()
-        
 
         if self.disable_movement != 1:
             if self.key_left_pressed:
@@ -187,12 +185,16 @@ class Player(arcade.Sprite):
             if self.key_up_pressed:
                 self.center_y += self.jump_height
 
-
         # Check for out-of-bounds
         if self.left < 0:
             self.left = 0
         elif self.right > self.screen_width - 1:
             self.right = self.screen_width - 1
+
+        if self.bottom < 0:
+            self.center_y = 500
+            self.center_x = 100
+            self.decrease_health(20)
         
         for shot in self.shoot_list:
             if shot.sprite.left < 0:

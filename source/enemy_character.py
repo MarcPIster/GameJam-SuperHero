@@ -1,4 +1,5 @@
 import arcade
+import random
 from math import sqrt
 from arcade.examples.sprite_health import IndicatorBar
 from source.shot import Shot
@@ -21,8 +22,9 @@ def load_texture_pair(filename):
 
 
 class Enemy(arcade.Sprite):
-    def __init__(self, x, y, scene):
+    def __init__(self, x, y, sound_manager, scene):
         super().__init__()
+        self.sound_manager = sound_manager
         self.enemy_sprite = arcade.Sprite("./assets/enemy/idle/idle6.png")
         self.enemy_sprite.center_x = 300
         self.enemy_sprite.center_y = 500
@@ -174,7 +176,9 @@ class Enemy(arcade.Sprite):
             self.right = self.screen_width - 1
 
         if self.bottom < 0:
-            self.bottom = 0
+            self.center_y = 500
+            self.center_x = 100
+            self.decrease_health(20)
         elif self.top > self.screen_height - 1:
             self.top = self.screen_height - 1
 
@@ -264,7 +268,8 @@ class Enemy(arcade.Sprite):
         self.health -= damage
         if self.health <= 0:
             self.health = 0
-
+            self.sound_manager.play_sound("dead")
+        self.sound_manager.play_sound(f'hurt-{random.randint(1, 4)}')
         self.indicator_bar.fullness = (self.health / PLAYER_HEALTH)
 
     def create_germ(self, jumpiness):
@@ -281,4 +286,4 @@ class Enemy(arcade.Sprite):
         self.create_germ(2.5)
         self.create_germ(5)
         self.shoot_clock = 0.8
-
+        self.sound_manager.play_sound("hit")
