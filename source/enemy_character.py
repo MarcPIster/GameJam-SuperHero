@@ -22,9 +22,10 @@ def load_texture_pair(filename):
 class Enemy(arcade.Sprite):
     def __init__(self, x, y):
         super().__init__()
-        self.enemy_sprite = arcade.Sprite("./assets/enemy/idle/idle6.png", scale=0.1)
+        self.enemy_sprite = arcade.Sprite("./assets/enemy/idle/idle6.png")
         self.enemy_sprite.center_x = 300
         self.enemy_sprite.center_y = 500
+        self.scale = 0.6
         self.physics_engine = None
         self.screen_width = x
         self.screen_height = y
@@ -57,6 +58,9 @@ class Enemy(arcade.Sprite):
         # 0 == right
         # 1 == left
         self.facing_direction = 0
+        # 0 == right
+        # 1 == left
+        self.shoot_direction = None
 
         # 0 == no
         # 1 == yes
@@ -174,7 +178,7 @@ class Enemy(arcade.Sprite):
 
         if self.shot == 1:
             self.cur_texture += 1
-            if self.cur_texture > 1:
+            if self.cur_texture > 6:
                 self.cur_texture = 0
             if self.key_left_pressed:
                 self.texture = self.shoot_texture[self.cur_texture][1]
@@ -188,16 +192,19 @@ class Enemy(arcade.Sprite):
         if self.key_up_pressed == False and self.key_right_pressed == False and self.key_left_pressed == False:
             if self.cur_texture > 1:
                 self.cur_texture = 0
-            self.texture = self.idle_textures[self.cur_texture][self.facing_direction]
+            direction = self.shoot_direction
+            if direction is None:
+                direction = self.facing_direction
+            self.texture = self.idle_textures[self.cur_texture][direction]
             return
 
         if self.change_y != 0 or self.key_up_pressed:
-            if self.cur_texture > 1:
+            if self.cur_texture > 7:
                 self.cur_texture = 0
             self.texture = self.jump_texture[self.cur_texture][self.facing_direction]
             return
 
-        if self.cur_texture > 5:
+        if self.cur_texture > 7:
             self.cur_texture = 0
         self.texture = self.walk_textures[self.cur_texture][self.facing_direction]
 
@@ -213,7 +220,7 @@ class Enemy(arcade.Sprite):
                 closest_player_index = i
 
         player = player_list[closest_player_index]
-        # follow player and try to shoot
+        # follow player and shoot
         if self.shot != 1:
             if player.center_x > self.center_x:
                 self.key_right_pressed = True
@@ -225,12 +232,16 @@ class Enemy(arcade.Sprite):
                 self.key_up_pressed = True
             else:
                 self.key_up_pressed = False
-            # if player in front of enemy, shoot
-            if abs(player.center_x - self.center_x) < 100 and abs(player.center_y - self.center_y) < 100:
+            if abs(player.center_x - self.center_x) < 250 and abs(player.center_y - self.center_y) < 50:
+                self.key_left_pressed = False
+                self.key_right_pressed = False
+                self.key_up_pressed = False
                 self.spacePressed = 0
+                self.shoot_direction = player.center_x < self.center_x
                 self.shoot()
             else:
                 self.spacePressed = 1
+                self.shoot_direction = None
 
     def decrease_health(self, damage):
         self.health -= damage
