@@ -147,8 +147,8 @@ class MyGame(arcade.View):
                                                                         gravity_constant=self.gravity_constant)
 
         if self.player_mode == Playermode.DUO.value:
-            self.second_player = Player(self.window.width, self.window.height, self.sound_manager, self.player_mode,
-                                        self.scene)
+            self.second_player = Player(self.window.width, self.window.height, self.sound_manager, self.scene,
+                                        self.player_mode)
             self.second_player.center_x = 100
             self.second_player.center_y = 500
             self.player_list.append(self.second_player)
@@ -227,17 +227,24 @@ class MyGame(arcade.View):
         self.game_over = True
         self.window.show_view(EndWindow(self))
 
-    def check_bullet_collision(self, player):
+    def check_bullet_collision(self, player, delta_time):
         for shot in player.shoot_list:
             shot.sprite.update()
+            if shot.hit == True:
+                shot.time_went_by += delta_time
+            if shot.total_time <= shot.time_went_by:
+                player.shoot_list.remove(shot)
+                break
+
             hit_list = arcade.check_for_collision_with_list(shot.sprite, self.player_list)
             if len(self.enemy_list) > 0:
                 hit_list.extend(arcade.check_for_collision_with_list(shot.sprite, self.enemy_list))
 
             if len(hit_list) > 0:
-                shot.sprite.remove_from_sprite_lists()
-                for player in hit_list:
-                    player.decrease_health(20)
+                for player_to_check in hit_list:
+                    player_to_check.decrease_health(shot.damage)
+                    player.shoot_list.remove(shot)
+                    break
 
     def stop_bullets_on_collision(self, shot):
         if shot.hit:
@@ -263,9 +270,9 @@ class MyGame(arcade.View):
             self.enemy_list.update_animation(delta_time)
 
         for player in self.player_list:
-            self.check_bullet_collision(player)
+            self.check_bullet_collision(player, delta_time)
         for enemy in self.enemy_list:
-            self.check_bullet_collision(enemy)
+            self.check_bullet_collision(enemy, delta_time)
 
         for player in self.player_list:
             if player.health <= 0:
@@ -293,6 +300,7 @@ class MyGame(arcade.View):
             seconds = int(time_passed) % 60
             seconds_100s = int((time_passed - (minutes * 60) - seconds) * 100)
             self.timer_text.text = f"{minutes:02d}:{seconds:02d}:{seconds_100s:02d}"
+
             if time_passed <= 0:
                 self.end_game()
             if time_passed <= 10:
@@ -304,7 +312,7 @@ class MyGame(arcade.View):
         for enemy in self.enemy_list:
             for shot in enemy.shoot_list:
                 self.stop_bullets_on_collision(shot)
-        
+
         for player in self.player_list:
             # check item collision
             player_collision_list = arcade.check_for_collision_with_lists(player, [

@@ -270,13 +270,14 @@ class Player(arcade.Sprite):
         elif key == arcade.key.RIGHT or key == arcade.key.D:
             self.key_right_pressed = False
         elif key == arcade.key.SPACE or key == arcade.key.NUM_0:
-            self.shot = 0
-            self.disable_movement = 0
-            self.key_shot_pressed = False
-
-            self.shoot_obj = Shot(self.center_x -50 if self.facing_direction else self.center_x + 50, self.center_y + 10, -10 if self.facing_direction else 10, 0, 10, self.animShot[0], self.scene)
-            self.shoot_obj.add_sprite_to_physical_engine()
-            self.shoot_list.append(self.shoot_obj)
+            print(self.energy)
+            if self.energy > 0:
+                self.shot = 0
+                self.disable_movement = 0
+                self.key_shot_pressed = False
+                self.shoot_obj = Shot(self.center_x -50 if self.facing_direction else self.center_x + 50, self.center_y + 10, -10 if self.facing_direction else 10, 0, 10, self.animShot[0], self.scene)
+                self.shoot_obj.add_sprite_to_physical_engine()
+                self.shoot_list.append(self.shoot_obj)
 
     def on_key_press_second(self):
         if self.disable_movement == 1:
@@ -292,14 +293,16 @@ class Player(arcade.Sprite):
             self.key_right_pressed = True
             self.facing_direction = 0
         if self.controller.b == True and self.shot != 1:
-            self.shot = 1
-            self.disable_movement = 1
-            self.key_shot_pressed = True
-            self.shoot_obj = Shot(self.center_x + 50, self.center_y + 10, -10 if self.facing_direction else 10, 0, 10,
-                        self.animShot[0],
-                                  self.scene)
-            self.shoot_obj.add_sprite_to_physical_engine()
-            self.shoot_list.append(self.shoot_obj)
+            if self.energy > 0:
+                self.shot = 1
+                self.disable_movement = 1
+                self.key_shot_pressed = True
+                self.shoot_obj = Shot(self.center_x -50 if self.facing_direction else self.center_x + 50, self.center_y + 10, -10 if self.facing_direction else 10, 0, 10,
+                            self.animShot[0],
+                                      self.scene)
+                self.shoot_obj.add_sprite_to_physical_engine()
+                self.shoot_list.append(self.shoot_obj)
+                self.shoot(10)
 
 
     def on_key_release_second(self):
