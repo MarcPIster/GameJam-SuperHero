@@ -2,6 +2,7 @@ import arcade
 
 from source.menus.end_screen import EndWindow
 from source.player_character import Player
+from source.enemy_character import Enemy
 from source.maps.map_manager import MapManager
 from source.menus.pause_screen import PauseManager
 
@@ -28,6 +29,8 @@ class MyGame(arcade.View):
         self.physics_engine = None
         self.player = None
         self.player_list = None
+        self.enemy = None
+        self.enemy_list = None
         self.scene = None
         self.gravity_constant = 0.5
         self.map_manager = MapManager()
@@ -70,6 +73,13 @@ class MyGame(arcade.View):
         self.player_list.append(self.player)
         self.scene.add_sprite("Player", self.player_list[0])
 
+        self.enemy_list = arcade.SpriteList()
+        self.enemy = Enemy(arcade.get_display_size()[0], arcade.get_display_size()[1])
+        self.enemy.center_x = 300
+        self.enemy.center_y = 500
+        self.enemy_list.append(self.enemy)
+        self.scene.add_sprite("Enemy", self.enemy_list[0])
+
         try:
             self.player.physics_engine = arcade.PhysicsEnginePlatformer(self.player_list[0],
                                                                         platforms=self.scene["Moving Platforms"],
@@ -78,6 +88,16 @@ class MyGame(arcade.View):
             self.moving_platforms = True
         except KeyError:
             self.player.physics_engine = arcade.PhysicsEnginePlatformer(self.player_list[0],
+                                                                        walls=self.scene["Platforms"],
+                                                                        gravity_constant=self.gravity_constant)
+
+        if self.moving_platforms:
+            self.enemy.physics_engine = arcade.PhysicsEnginePlatformer(self.enemy_list[0],
+                                                                        platforms=self.scene["Moving Platforms"],
+                                                                        walls=self.scene["Platforms"],
+                                                                        gravity_constant=self.gravity_constant)
+        else:
+            self.enemy.physics_engine = arcade.PhysicsEnginePlatformer(self.enemy_list[0],
                                                                         walls=self.scene["Platforms"],
                                                                         gravity_constant=self.gravity_constant)
 
@@ -91,6 +111,7 @@ class MyGame(arcade.View):
         self.scene.draw()
         self.player.powerups.draw()
         self.player.bar_list.draw()
+        self.enemy.bar_list.draw()
 
         self.gui_camera.use()
         half_window_width = self.window.width // 2
@@ -108,13 +129,13 @@ class MyGame(arcade.View):
         if key == arcade.key.P:
             self.player.decrease_health(5)
         if key == arcade.key.J:
-            self.load_level(self.map_manager.load_level(1))
+            self.load_level(1)
         if key == arcade.key.K:
-            self.load_level(self.map_manager.load_level(2))
+            self.load_level(2)
         if key == arcade.key.L:
-            self.load_level(self.map_manager.load_level(3))
+            self.load_level(3)
         if key == arcade.key.M:
-            self.load_level(self.map_manager.load_level(4))
+            self.load_level(4)
         self.player.on_key_press(key, modifiers)
 
     def on_key_release(self, key, modifiers):
@@ -140,6 +161,10 @@ class MyGame(arcade.View):
         self.player_list.update()
         self.player_list.update_animation(delta_time)
 
+        self.enemy.on_update(delta_time, self.player_list)
+        self.enemy_list.update()
+        self.enemy_list.update_animation(delta_time)
+
         for player in self.player_list:
             if player.health <= 0:
                 self.end_game()
@@ -155,7 +180,7 @@ class MyGame(arcade.View):
 
         # update timer
         self.total_time += delta_time
-        time_passed = 10 - self.total_time
+        time_passed = 120 - self.total_time
         minutes = int(time_passed) // 60
         seconds = int(time_passed) % 60
         seconds_100s = int((time_passed - (minutes * 60) - seconds) * 100)
