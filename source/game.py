@@ -114,6 +114,7 @@ class MyGame(arcade.View):
                                                                         walls=self.scene["Platforms"],
                                                                         gravity_constant=self.gravity_constant)
 
+
         if self.player_mode == Playermode.DUO.value:
             self.second_player = Player(self.window.width, self.window.height, self.sound_manager, self.player_mode)
             self.second_player.center_x = 100

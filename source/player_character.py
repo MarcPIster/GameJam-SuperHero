@@ -4,6 +4,7 @@ import arcade
 import pyglet
 from source.game_mode import Gamemode,Playermode
 from arcade.examples.sprite_health import IndicatorBar
+from source.shot import Shot
 
 PLAYER_HEALTH = 100
 PLAYER_ENERGY = 100
@@ -146,6 +147,9 @@ class Player(arcade.Sprite):
         self.texture = self.walk_textures[0][self.facing_direction]
 
     def on_update(self, delta_time):
+        print(len(self.shoot_list ))
+        for shot in self.shoot_list:
+            shot.update()
         self.physics_engine.update()
         self.update_energy(delta_time)
 
@@ -269,11 +273,19 @@ class Player(arcade.Sprite):
             self.shot = 0
             self.disable_movement = 0
             self.key_shot_pressed = False
-            laser = arcade.Sprite(self.animShot[0], 1.5)
-            laser.center_x = self.center_x + 50
-            laser.center_y = self.center_y + 10
-            laser.change_x = -10 if self.facing_direction else 10
-            self.shoot_list.append(laser)
+
+            shot = Shot( self.center_x + 50, self.center_y + 10, -10 if self.facing_direction else 10, 10, self.animShot[0])
+
+            shot.change_x = -10 if self.facing_direction else 10
+            self.shoot_list.append(shot.sprite)
+
+            try:
+                self.shoot_list[-1].physics_engine = arcade.PhysicsEnginePlatformer(self.shoot_list[-1],
+                                                                            gravity_constant=0.5,
+                                                                    )
+            except:
+                self.shoot_list[-1].physics_engine = arcade.PhysicsEnginePlatformer(self.shoot_list[-1],
+                                                                            gravity_constant=0.5)
 
     def on_key_press_second(self):
         if self.disable_movement == 1:
@@ -292,11 +304,18 @@ class Player(arcade.Sprite):
             self.shot = 1
             self.disable_movement = 1
             self.key_shot_pressed = True
-            laser = arcade.Sprite(self.animShot[0], 1.5)
-            laser.center_x = self.center_x + 50
-            laser.center_y = self.center_y + 10
-            laser.change_x = -10 if self.facing_direction else 10
-            self.shoot_list.append(laser)
+            shot = arcade.Sprite(self.animShot[0], 1.5)
+            shot.center_x = self.center_x + 50
+            shot.center_y = self.center_y + 10
+            shot.change_x = -10 if self.facing_direction else 10
+            self.shoot_list.append(shot.sprite)
+            try:
+                self.shoot_list[-1].physics_engine = arcade.PhysicsEnginePlatformer(self.shoot_list[-1],
+                                                                            gravity_constant=0.5)
+            except:
+                self.shoot_list[-1].physics_engines = arcade.PhysicsEnginePlatformer(self.shoot_list[-1],
+                                                                            gravity_constant=0.5)
+
 
     def on_key_release_second(self):
         if self.controller.x == False:
