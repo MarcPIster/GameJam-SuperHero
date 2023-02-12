@@ -6,6 +6,7 @@ from source.enemy_character import Enemy
 from source.maps.map_manager import MapManager
 from source.menus.pause_screen import PauseManager
 from source.game_mode import Gamemode, Playermode
+from random import seed, randint, randrange
 
 # LAYER order:
 # 1: Platforms
@@ -33,14 +34,22 @@ class MyGame(arcade.View):
         self.player_list = None
         self.enemy = None
         self.enemy_list = None
+        self.bat_list = []
         self.scene = None
+        self.random_bat_spawn = []
         self.gravity_constant = 0.5
         self.map_manager = MapManager()
         self.moving_platforms = None
         self.pause_manager = PauseManager()
 
+        # bat animation
+        self.anim_time = 0
+        self.current_bat_animation = 0
+        self.bat_anim_list = ["./assets/bat/left/left0.png", "./assets/bat/left/left1.png", "./assets/bat/left/left2.png"]
+
         self.gui_camera = arcade.Camera(self.window.width, self.window.height)
         self.total_time = 0.0
+        self.time_past = 0.0
         self.countdown_time = 0
         if game_mode == Gamemode.TIME:
             self.timer_text = arcade.Text(
@@ -115,6 +124,10 @@ class MyGame(arcade.View):
         self.scene.add_sprite("Player", self.player_list[0])
 
         self.enemy_list = arcade.SpriteList()
+        self.bat_list = arcade.SpriteList()
+        # generate random wave for bat appearance
+        for i in range(5):
+            self.random_bat_spawn.append(randrange(1, 119))
         if self.player_mode == 1:
             self.enemy = Enemy(arcade.get_display_size()[0], arcade.get_display_size()[1], self.scene)
             self.enemy.center_x = 500
@@ -244,6 +257,12 @@ class MyGame(arcade.View):
                     player.shoot_list.remove(shot)
                     break
 
+            bat_shot_list = arcade.check_for_collision_with_list(shot.sprite, self.bat_list)
+
+            for bat in bat_shot_list:
+                bat.remove_from_sprite_lists()
+                player.shoot_list.remove(shot)
+
     def stop_bullets_on_collision(self, shot):
         if shot.hit:
             return
@@ -261,6 +280,8 @@ class MyGame(arcade.View):
         self.player_list.on_update(delta_time)
         self.player_list.update()
         self.player_list.update_animation(delta_time)
+        self.bat_list.update()
+        self.bat_animation(delta_time)
 
         if self.player_mode == 1:
             self.enemy.on_update(delta_time, self.player_list)
@@ -314,11 +335,38 @@ class MyGame(arcade.View):
                     self.sound_manager.play_sound('beep')
                     self.countdown_time = 0
 
+            for bat_spawn_time in self.random_bat_spawn:
+                if time_passed < bat_spawn_time:
+                    for i in range(3):
+                        bat = arcade.Sprite("./assets/bat/left/left0.png", 1.5)
+                        bat.center_x = self.window.width - 5
+                        bat.center_y = self.window.height - 50 - i * 100
+                        bat.change_x = -5
+                        self.bat_list.append(bat)
+                        self.scene.add_sprite("bat", self.bat_list[-1])
+                    self.random_bat_spawn.remove(bat_spawn_time)
+                    continue
+
+
+        for bat in self.bat_list:
+            if bat.center_x < 0:
+                bat.remove_from_sprite_lists()
+                continue
+
+
         for enemy in self.enemy_list:
             for shot in enemy.shoot_list:
                 self.stop_bullets_on_collision(shot)
 
         for player in self.player_list:
+            player_collision_list = arcade.check_for_collision_with_list(player, self.bat_list)
+
+            for bat in player_collision_list:
+                player.decrease_health(50)
+                bat.remove_from_sprite_lists()
+                continue
+
+
             # check item collision
             player_collision_list = arcade.check_for_collision_with_lists(player, [
                 self.scene["FireItem"],
@@ -333,3 +381,19 @@ class MyGame(arcade.View):
                 elif self.scene["BombItem"] in collision.sprite_lists:
                     player.activate_bomb_shoot()
                 collision.remove_from_sprite_lists()
+
+    def bat_animation(self, delta_time):
+        self.anim_time += delta_time
+
+        if self.anim_time < 0.16:
+            return
+
+        self.anim_time = 0
+        self.current_bat_animation += 1
+
+        if self.current_bat_animation > 2:
+            self.current_bat_animation = 0
+        for bat in self.bat_list:
+            bat.texture = arcade.load_texture(self.bat_anim_list[self.current_bat_animation])
+
+
