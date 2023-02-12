@@ -1,5 +1,7 @@
 import arcade
+#from source.game import MyGame
 from source.menus.setting_screen import SettingsWindow
+
 
 
 class EndWindow(arcade.View):

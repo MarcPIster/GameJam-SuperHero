@@ -1,6 +1,7 @@
 import arcade
 import arcade.gui
 from source.game import MyGame
+from source.menus.playermode_screen import PlayermodeWindow
 from source.menus.setting_screen import SettingsWindow
 
 
@@ -44,13 +45,13 @@ class StartWindow(arcade.View):
         )
 
     def on_click_start(self, event):
-        game = MyGame(self.sound_manager)
-        game.setup()
         self.deactivate()
-        self.window.show_view(game)
+        playermode = PlayermodeWindow(self.sound_manager, self)
+        self.window.show_view(playermode)
         print("Start:", event)
 
     def on_click_settings(self, event):
+        self.deactivate()
         settings = SettingsWindow(self.sound_manager, self)
         self.manager.disable()
         self.window.show_view(settings)

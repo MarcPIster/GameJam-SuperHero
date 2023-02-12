@@ -5,6 +5,7 @@ from source.player_character import Player
 from source.enemy_character import Enemy
 from source.maps.map_manager import MapManager
 from source.menus.pause_screen import PauseManager
+from source.game_mode import Gamemode,Playermode
 
 # LAYER order:
 # 1: Platforms
@@ -20,7 +21,7 @@ class MyGame(arcade.View):
     Main application class.
     """
 
-    def __init__(self, sound_manager):
+    def __init__(self, game_mode, player_mode, sound_manager):
         super().__init__()
         self.game_over = False
         self.player_won = -1
@@ -28,6 +29,7 @@ class MyGame(arcade.View):
         self.next_level = True
         self.physics_engine = None
         self.player = None
+        self.second_player = None
         self.player_list = None
         self.enemy = None
         self.enemy_list = None
@@ -39,6 +41,7 @@ class MyGame(arcade.View):
 
         self.gui_camera = arcade.Camera(self.window.width, self.window.height)
         self.total_time = 0.0
+        self.countdown_time = 0
         self.timer_text = arcade.Text(
             text="00:00:00",
             start_x=self.window.width // 2,
@@ -48,8 +51,24 @@ class MyGame(arcade.View):
             anchor_x="center"
         )
 
-        self.sound_manager = sound_manager
+        self.game_mode = game_mode
+        self.player_mode = player_mode
         arcade.set_background_color(arcade.csscolor.CORNFLOWER_BLUE)
+
+        self.sound_manager = sound_manager
+
+        self.sound_manager.add_sound(f'hit2', f'./assets/sounds/hit2.wav')
+        self.sound_manager.add_sound(f'hit', f'./assets/sounds/hit1.wav')
+        self.sound_manager.add_sound(f'dead', f'./assets/sounds/diesound.wav')
+        self.sound_manager.add_sound(f'coin-collect', f'./assets/sounds/coincollect.wav')
+        self.sound_manager.add_sound(f'item-collect', f'./assets/sounds/itemcollect.wav')
+        self.sound_manager.add_sound(f'beep', f'./assets/sounds/beep.wav')
+        self.sound_manager.add_sound(f'jump', f'./assets/sounds/jump.wav')
+        self.sound_manager.add_sound(f'hurt-1', f'./assets/sounds/hurt1.wav')
+        self.sound_manager.add_sound(f'hurt-2', f'./assets/sounds/hurt2.wav')
+        self.sound_manager.add_sound(f'hurt-3', f'./assets/sounds/hurt3.wav')
+        self.sound_manager.add_sound(f'hurt-4', f'./assets/sounds/hurt4.wav')
+
 
     def setup(self, level=1):
         """ Set up the game here. Call this function to restart the game. """
@@ -57,16 +76,32 @@ class MyGame(arcade.View):
         self.load_level(level)
         self.total_time = 0.0
 
-    def load_level(self, level):
+
+    def load_level(self, level_id):
         self.moving_platforms = False
-        self.level = level
+        self.level = level_id
         if self.level >= MAX_LEVEL:
             self.next_level = False
-        self.scene = arcade.Scene.from_tilemap(self.map_manager.load_level(level))
+        self.scene = arcade.Scene.from_tilemap(self.map_manager.load_level(level_id))
+        self.sound_manager.stop_all_music()
+        self.sound_manager.stop_all_sounds()
+        print(f'Loading level{level_id} ...')
+        try:
+            self.sound_manager.add_music(f'level{level_id}', f'./assets/sounds/level{level_id}.wav')
+            self.sound_manager.play_music(f'level{level_id}')
+        except FileNotFoundError:
+            print(f'No music for level {level_id} found. Default theme will be used...')
+            self.sound_manager.add_music('maintheme', './assets/sounds/theme.wav')
+            self.sound_manager.play_music('maintheme')
+
+
+        self.moving_platforms = False
+        self.scene = arcade.Scene.from_tilemap(self.map_manager.load_level(level_id))
+
 
         self.scene.add_sprite_list_before("Player", "Coins")
 
-        self.player = Player(arcade.get_display_size()[0], arcade.get_display_size()[1])
+        self.player = Player(arcade.get_display_size()[0], arcade.get_display_size()[1], self.sound_manager)
         self.player_list = arcade.SpriteList()
         self.player.center_x = 100
         self.player.center_y = 500
@@ -91,6 +126,23 @@ class MyGame(arcade.View):
                                                                         walls=self.scene["Platforms"],
                                                                         gravity_constant=self.gravity_constant)
 
+        if self.player_mode == Playermode.DUO.value:
+            self.second_player = Player(arcade.get_display_size()[0], arcade.get_display_size()[1], self.sound_manager, self.player_mode)
+            self.second_player.center_x = 100
+            self.second_player.center_y = 500
+            self.player_list.append(self.second_player)
+            self.scene.add_sprite("Player2", self.player_list[1])
+            try:
+                self.second_player.physics_engine = arcade.PhysicsEnginePlatformer(self.player_list[1],
+                                                                            platforms=self.scene["Moving Platforms"],
+                                                                            walls=self.scene["Platforms"],
+                                                                            gravity_constant=self.gravity_constant)
+            except KeyError:
+                self.second_player.physics_engine = arcade.PhysicsEnginePlatformer(self.player_list[1],
+                                                                            walls=self.scene["Platforms"],
+                                                                            gravity_constant=self.gravity_constant)
+
+
         if self.moving_platforms:
             self.enemy.physics_engine = arcade.PhysicsEnginePlatformer(self.enemy_list[0],
                                                                         platforms=self.scene["Moving Platforms"],
@@ -109,8 +161,9 @@ class MyGame(arcade.View):
         """ Render the screen. """
         self.clear()
         self.scene.draw()
-        self.player.powerups.draw()
-        self.player.bar_list.draw()
+        for player in self.player_list:
+            player.powerups.draw()
+            player.bar_list.draw()
         self.enemy.bar_list.draw()
 
         self.gui_camera.use()
@@ -140,7 +193,8 @@ class MyGame(arcade.View):
 
     def on_key_release(self, key, modifiers):
         self.player.on_key_release(key, modifiers)
-        self.pause_manager.on_key_press(key, self, )
+
+        self.pause_manager.on_key_press(key, self)
 
     def end_game(self):
         tmp = 0
@@ -173,10 +227,15 @@ class MyGame(arcade.View):
             self.scene.update(["Moving Platforms"])
 
         # detect collision with coins
-        coin_hit_list = arcade.check_for_collision_with_list(self.player_list[0], self.scene["Coins"])
-        for coin in coin_hit_list:
-            coin.remove_from_sprite_lists()
-            self.player.increase_score()
+        for i in range(len(self.player_list)):
+            coin_hit_list = arcade.check_for_collision_with_list(self.player_list[i], self.scene["Coins"])
+            for coin in coin_hit_list:
+                coin.remove_from_sprite_lists()
+                if i == 0:
+                    self.player.increase_score()
+                else:
+                    self.second_player.increase_score()
+                self.sound_manager.play_sound('coin-collect')
 
         # update timer
         self.total_time += delta_time
@@ -187,16 +246,22 @@ class MyGame(arcade.View):
         self.timer_text.text = f"{minutes:02d}:{seconds:02d}:{seconds_100s:02d}"
         if time_passed <= 0:
             self.end_game()
+        if time_passed <= 10:
+            self.countdown_time += delta_time
+            if self.countdown_time >= 1:
+                self.sound_manager.play_sound('beep')
+                self.countdown_time = 0
 
-        # check item collision
-        player_collision_list = arcade.check_for_collision_with_lists(self.player, [
-            self.scene["FireItem"],
-            self.scene["BombItem"]
-        ])
+        for player in self.player_list:
+            # check item collision
+            player_collision_list = arcade.check_for_collision_with_lists(player, [
+                self.scene["FireItem"],
+                self.scene["BombItem"]
+            ])
 
-        for collision in player_collision_list:
-            if self.scene["FireItem"] in collision.sprite_lists:
-                self.player.activate_fire_shoot()
-            elif self.scene["BombItem"] in collision.sprite_lists:
-                self.player.activate_bomb_shoot()
-            collision.remove_from_sprite_lists()
+            for collision in player_collision_list:
+                if self.scene["FireItem"] in collision.sprite_lists:
+                    player.activate_fire_shoot()
+                elif self.scene["BombItem"] in collision.sprite_lists:
+                    player.activate_bomb_shoot()
+                collision.remove_from_sprite_lists()

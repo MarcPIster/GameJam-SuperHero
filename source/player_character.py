@@ -1,4 +1,8 @@
+import random
+
 import arcade
+import pyglet
+from source.game_mode import Gamemode,Playermode
 from arcade.examples.sprite_health import IndicatorBar
 
 PLAYER_HEALTH = 100
@@ -19,8 +23,11 @@ def load_texture_pair(filename):
 
 
 class Player(arcade.Sprite):
-    def __init__(self, x, y):
+    def __init__(self, x, y, sound_manager, mode=1):
         super().__init__()
+        self.sound_manager = sound_manager
+
+
         self.player_sprite = arcade.Sprite("./assets/player/walk/walk0.png", 1.5)
         self.player_sprite.center_x = 100
         self.player_sprite.center_y = 500
@@ -38,6 +45,7 @@ class Player(arcade.Sprite):
 
         self.health = PLAYER_HEALTH
         self.energy = PLAYER_ENERGY
+        self.energy_timer = 0
         self.bar_list = arcade.SpriteList()
         self.indicator_bar: IndicatorBar = IndicatorBar(self, self.bar_list,
                                                         (self.player_sprite.center_x, self.player_sprite.center_y))
@@ -49,6 +57,7 @@ class Player(arcade.Sprite):
         self.key_left_pressed = False
         self.key_right_pressed = False
         self.key_shot_pressed = False
+        self.player_mode = mode
 
         # 0 == no
         # 1 == yes
@@ -86,6 +95,14 @@ class Player(arcade.Sprite):
         self.shot_texture = []
         self.knocked_texture = []
         self.set_up()
+
+        # get a list of all controllers:
+        if self.player_mode == Playermode.DUO.value:
+            controllers = pyglet.input.get_controllers()
+            if controllers:
+                self.controller = controllers[0]
+                self.controller.close()
+                self.controller.open()
 
     def set_up(self):
         self.animHit = ["./assets/player/hit/hit0.png", "./assets/player/hit/hit1.png"]
@@ -129,6 +146,7 @@ class Player(arcade.Sprite):
 
     def on_update(self, delta_time):
         self.physics_engine.update()
+        self.update_energy(delta_time)
 
         self.indicator_bar.position = (
             self.center_x,
@@ -146,10 +164,13 @@ class Player(arcade.Sprite):
     
     def update(self):
         """ Move the player """
+        print("yes")
         # Move player.
         # Remove these lines if physics engine is moving player.
+        if self.player_mode == Playermode.DUO.value:
+            self.on_key_press_second()
+            self.on_key_release_second()
         
-        self.facing_direction = 0
 
         if self.disable_movement != 1:
             if self.key_left_pressed:
@@ -157,19 +178,16 @@ class Player(arcade.Sprite):
                 self.facing_direction = 1
             if self.key_right_pressed:
                 self.center_x += self.speed
+                self.facing_direction = 0
             if self.key_up_pressed:
                 self.center_y += self.jump_height
+
 
         # Check for out-of-bounds
         if self.left < 0:
             self.left = 0
         elif self.right > self.screen_width - 1:
             self.right = self.screen_width - 1
-
-        if self.bottom < 0:
-            self.bottom = 0
-        elif self.top > self.screen_height - 1:
-            self.top = self.screen_height - 1
 
     def increase_score(self):
         self.score += 1
@@ -202,6 +220,7 @@ class Player(arcade.Sprite):
 
         if self.change_y != 0 or self.key_up_pressed:
             if self.cur_texture > 1:
+                self.sound_manager.play_sound("jump") # ToDo: Fix jump soumd, animation may not be the best place to play this
                 self.cur_texture = 0
             self.texture = self.jump_texture[self.cur_texture][self.facing_direction]
             return
@@ -211,7 +230,7 @@ class Player(arcade.Sprite):
         self.texture = self.walk_textures[self.cur_texture][self.facing_direction]
 
     def on_key_press(self, key, modifiers):
-        if self.disable_movement == 1:
+        if self.disable_movement == 1 or self.player_mode == Playermode.DUO.value:
             return
 
         if (key == arcade.key.UP or key == arcade.key.W) and self.spacePressed != 1:
@@ -230,6 +249,9 @@ class Player(arcade.Sprite):
             self.shoot(10)
 
     def on_key_release(self, key, modifiers):
+        if self.player_mode == Playermode.DUO.value:
+            return
+
         if key == arcade.key.UP or key == arcade.key.W:
             self.spacePressed = 0
             self.key_up_pressed = False
@@ -242,24 +264,57 @@ class Player(arcade.Sprite):
             self.disable_movement = 0
             self.key_shot_pressed = False
 
+    def on_key_press_second(self):
+        if self.disable_movement == 1:
+            return
+
+        if self.controller.x == True and self.spacePressed != 1:
+            self.spacePressed = 1
+            self.key_up_pressed = True
+        if round(self.controller.leftx, 0) == -1:
+            self.key_left_pressed = True
+            self.facing_direction = 1
+        if round(self.controller.leftx, 0) == 1:
+            self.key_right_pressed = True
+            self.facing_direction = 0
+        if self.controller.b == True and self.shot != 1:
+            self.shot = 1
+            self.disable_movement = 1
+            self.key_shot_pressed = True
+
+    def on_key_release_second(self):
+        if self.controller.x == False:
+            self.spacePressed = 0
+            self.key_up_pressed = False
+        if self.controller.leftx >= 0 and self.controller.leftx <= 0.4:
+            self.key_left_pressed = False
+            self.key_right_pressed = False
+        if self.controller.b == False:
+            self.shot = 0
+            self.disable_movement = 0
+            self.key_shot_pressed = False
+
+
     def decrease_health(self, damage):
         self.health -= damage
         if self.health <= 0:
             self.health = 0
-
+            self.sound_manager.play_sound("dead")
+        self.sound_manager.play_sound(f'hurt-{random.randint(1, 4)}')
         self.indicator_bar.fullness = (self.health / PLAYER_HEALTH)
 
     def shoot(self, energy):
         self.energy -= energy
         if self.energy <= 0:
             self.energy = 0
-
+        self.sound_manager.play_sound("hit")
         self.shooting_bar.fullness = (self.energy / PLAYER_ENERGY)
 
     def activate_fire_shoot(self):
         if self.hasFireShoot:
             return
         self.hasFireShoot = True
+        self.sound_manager.play_sound("item-collect")
         sprite = arcade.Sprite("./assets/powerups/Fire.png", 0.14)
         self.powerups.append(sprite)
 
@@ -267,5 +322,15 @@ class Player(arcade.Sprite):
         if self.hasBombShoot:
             return
         self.hasBombShoot = True
+        self.sound_manager.play_sound("item-collect")
         sprite = arcade.Sprite("./assets/powerups/Bomb.png", 0.14)
         self.powerups.append(sprite)
+
+    def update_energy(self, delta_time):
+        if self.energy_timer > 1:
+            self.energy_timer = 0
+            self.energy += 5
+            if self.energy > PLAYER_ENERGY:
+                self.energy = PLAYER_ENERGY
+            self.shooting_bar.fullness = (self.energy / PLAYER_ENERGY)
+        self.energy_timer += delta_time
