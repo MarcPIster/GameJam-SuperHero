@@ -229,6 +229,8 @@ class MyGame(arcade.View):
             for shot in player.shoot_list:
                 shot.sprite.update()
                 hit_list = arcade.check_for_collision_with_list(shot.sprite, self.player_list)
+                if len(self.enemy_list) > 0:
+                    hit_list.extend(arcade.check_for_collision_with_list(shot.sprite, self.enemy_list))
 
                 if len(hit_list) > 0:
                     shot.sprite.remove_from_sprite_lists()

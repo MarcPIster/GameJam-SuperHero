@@ -149,7 +149,6 @@ class Player(arcade.Sprite):
         self.texture = self.walk_textures[0][self.facing_direction]
 
     def on_update(self, delta_time):
-        print(len(self.shoot_list))
         for shot in self.shoot_list:
             shot.physics_engine.update()
         self.physics_engine.update()
@@ -196,7 +195,6 @@ class Player(arcade.Sprite):
             self.right = self.screen_width - 1
         
         for shot in self.shoot_list:
-            print(shot.sprite.left, shot.sprite.right, self.screen_width)
             if shot.sprite.left < 0:
                 shot.sprite.remove_from_sprite_lists()
             elif shot.sprite.right > self.screen_width - 1:
@@ -220,7 +218,7 @@ class Player(arcade.Sprite):
                 self.cur_texture = 0
             self.texture = self.shoot_texture[self.cur_texture][self.facing_direction]
             self.deltaAnimTime = 0
-            return 
+            return
         
         self.cur_texture += 1
 
