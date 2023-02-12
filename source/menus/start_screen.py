@@ -3,6 +3,7 @@ import arcade.gui
 from source.game import MyGame
 from source.menus.playermode_screen import PlayermodeWindow
 from source.menus.setting_screen import SettingsWindow
+from source.menus.intro import Intro
 
 
 class StartWindow(arcade.View):
@@ -16,6 +17,7 @@ class StartWindow(arcade.View):
         self.sound_manager = sound_manager.get_sound_manager()
         self.sound_manager.add_music("maintheme", "./assets/sounds/theme.wav")
         self.sound_manager.play_music("maintheme")
+        self.intro = Intro()
 
         # Set background color
         arcade.set_background_color(arcade.color.DARK_BLUE_GRAY)
@@ -67,10 +69,14 @@ class StartWindow(arcade.View):
     def on_draw(self):
         self.clear()
         self.manager.draw()
+        self.intro.on_draw()
 
     def activate(self):
         self.manager.enable()
         self.window.show_view(self)
+
+    def on_update(self, delta_time):
+        self.intro.on_update(delta_time)
 
     def on_show(self):
         pass
