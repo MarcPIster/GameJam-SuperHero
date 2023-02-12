@@ -275,8 +275,6 @@ class Player(arcade.Sprite):
             self.key_shot_pressed = False
 
             shot = Shot( self.center_x + 50, self.center_y + 10, -10 if self.facing_direction else 10, 10, self.animShot[0])
-
-            shot.change_x = -10 if self.facing_direction else 10
             self.shoot_list.append(shot.sprite)
 
             try:
@@ -304,10 +302,8 @@ class Player(arcade.Sprite):
             self.shot = 1
             self.disable_movement = 1
             self.key_shot_pressed = True
-            shot = arcade.Sprite(self.animShot[0], 1.5)
-            shot.center_x = self.center_x + 50
-            shot.center_y = self.center_y + 10
-            shot.change_x = -10 if self.facing_direction else 10
+            shot = Shot(self.center_x + 50, self.center_y + 10, -10 if self.facing_direction else 10, 10,
+                        self.animShot[0])
             self.shoot_list.append(shot.sprite)
             try:
                 self.shoot_list[-1].physics_engine = arcade.PhysicsEnginePlatformer(self.shoot_list[-1],
