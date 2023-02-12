@@ -2,6 +2,7 @@ import arcade
 
 from source.menus.end_screen import EndWindow
 from source.player_character import Player
+from source.enemy_character import Enemy
 from source.maps.map_manager import MapManager
 from source.menus.pause_screen import PauseManager
 from source.game_mode import Gamemode, Playermode
@@ -30,6 +31,8 @@ class MyGame(arcade.View):
         self.player = None
         self.second_player = None
         self.player_list = None
+        self.enemy = None
+        self.enemy_list = None
         self.scene = None
         self.gravity_constant = 0.5
         self.map_manager = MapManager()
@@ -66,13 +69,16 @@ class MyGame(arcade.View):
         self.sound_manager.add_sound(f'hurt-3', f'./assets/sounds/hurt3.wav')
         self.sound_manager.add_sound(f'hurt-4', f'./assets/sounds/hurt4.wav')
 
+
     def setup(self, level=1):
         """ Set up the game here. Call this function to restart the game. """
         self.game_over = False
         self.load_level(level)
         self.total_time = 0.0
 
+
     def load_level(self, level_id):
+        self.moving_platforms = False
         self.level = level_id
         if self.level >= MAX_LEVEL:
             self.next_level = False
@@ -88,8 +94,10 @@ class MyGame(arcade.View):
             self.sound_manager.add_music('maintheme', './assets/sounds/theme.wav')
             self.sound_manager.play_music('maintheme')
 
+
         self.moving_platforms = False
         self.scene = arcade.Scene.from_tilemap(self.map_manager.load_level(level_id))
+
 
         self.scene.add_sprite_list_before("Player", "Coins")
 
@@ -99,6 +107,24 @@ class MyGame(arcade.View):
         self.player.center_y = 500
         self.player_list.append(self.player)
         self.scene.add_sprite("Player", self.player_list[0])
+
+        self.enemy_list = arcade.SpriteList()
+        if self.player_mode == 1:
+            self.enemy = Enemy(arcade.get_display_size()[0], arcade.get_display_size()[1])
+            self.enemy.center_x = 300
+            self.enemy.center_y = 500
+            self.enemy_list.append(self.enemy)
+            self.scene.add_sprite("Enemy", self.enemy_list[0])
+            if self.moving_platforms:
+                self.enemy.physics_engine = arcade.PhysicsEnginePlatformer(self.enemy_list[0],
+                                                                           platforms=self.scene["Moving Platforms"],
+                                                                           walls=self.scene["Platforms"],
+                                                                           gravity_constant=self.gravity_constant)
+            else:
+                self.enemy.physics_engine = arcade.PhysicsEnginePlatformer(self.enemy_list[0],
+                                                                           walls=self.scene["Platforms"],
+                                                                           gravity_constant=self.gravity_constant)
+
         try:
             self.player.physics_engine = arcade.PhysicsEnginePlatformer(self.player_list[0],
                                                                         platforms=self.scene["Moving Platforms"],
@@ -119,10 +145,9 @@ class MyGame(arcade.View):
             self.scene.add_sprite("Player2", self.player_list[1])
             try:
                 self.second_player.physics_engine = arcade.PhysicsEnginePlatformer(self.player_list[1],
-                                                                                   platforms=self.scene[
-                                                                                       "Moving Platforms"],
-                                                                                   walls=self.scene["Platforms"],
-                                                                                   gravity_constant=self.gravity_constant)
+                                                                            platforms=self.scene["Moving Platforms"],
+                                                                            walls=self.scene["Platforms"],
+                                                                            gravity_constant=self.gravity_constant)
             except KeyError:
                 self.second_player.physics_engine = arcade.PhysicsEnginePlatformer(self.player_list[1],
                                                                             walls=self.scene["Platforms"],
@@ -142,6 +167,8 @@ class MyGame(arcade.View):
             player.bar_list.draw()
             for shot in player.shoot_list:
                 shot.sprite.draw()
+        if self.player_mode == 1:
+            self.enemy.bar_list.draw()
 
         self.gui_camera.use()
         half_window_width = self.window.width // 2
@@ -168,6 +195,7 @@ class MyGame(arcade.View):
             self.load_level(4)
         self.player.on_key_press(key, modifiers)
 
+
     def on_key_release(self, key, modifiers):
         self.player.on_key_release(key, modifiers)
 
@@ -191,6 +219,11 @@ class MyGame(arcade.View):
         self.player_list.on_update(delta_time)
         self.player_list.update()
         self.player_list.update_animation(delta_time)
+
+        if self.player_mode == 1:
+            self.enemy.on_update(delta_time, self.player_list)
+            self.enemy_list.update()
+            self.enemy_list.update_animation(delta_time)
 
         for player in self.player_list:
             for shot in player.shoot_list:
@@ -222,20 +255,23 @@ class MyGame(arcade.View):
                 self.sound_manager.play_sound('coin-collect')
 
         # update timer
-        self.total_time += delta_time
-        time_passed = 120 - self.total_time
-        minutes = int(time_passed) // 60
-        seconds = int(time_passed) % 60
-        seconds_100s = int((time_passed - (minutes * 60) - seconds) * 100)
-        self.timer_text.text = f"{minutes:02d}:{seconds:02d}:{seconds_100s:02d}"
-        if time_passed <= 0:
-            self.end_game()
-        if time_passed <= 10:
-            self.countdown_time += delta_time
-            if self.countdown_time >= 1:
-                self.sound_manager.play_sound('beep')
-                self.countdown_time = 0
-        
+        if self.game_mode == 2:
+            self.total_time += delta_time
+            time_passed = 120 - self.total_time
+            minutes = int(time_passed) // 60
+            seconds = int(time_passed) % 60
+            seconds_100s = int((time_passed - (minutes * 60) - seconds) * 100)
+            self.timer_text.text = f"{minutes:02d}:{seconds:02d}:{seconds_100s:02d}"
+            if time_passed <= 0:
+                self.end_game()
+            if time_passed <= 10:
+                self.countdown_time += delta_time
+                if self.countdown_time >= 1:
+                    self.sound_manager.play_sound('beep')
+                    self.countdown_time = 0
+        else:
+            self.timer_text.text = "FIGHT!"
+
         for player in self.player_list:
             # check item collision
             player_collision_list = arcade.check_for_collision_with_lists(player, [
