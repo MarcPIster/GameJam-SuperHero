@@ -275,9 +275,9 @@ class Player(arcade.Sprite):
             self.disable_movement = 0
             self.key_shot_pressed = False
 
-            shot = Shot( self.center_x + 50, self.center_y + 10, -10 if self.facing_direction else 10, 10, self.animShot[0])
-            shot.add_sprite_to_physical_engine()
-            self.shoot_list.append(shot)
+            self.shoot_obj = Shot(self.center_x + 50, self.center_y + 10, -10 if self.facing_direction else 10, 10, self.animShot[0])
+            self.shoot_obj.add_sprite_to_physical_engine()
+            self.shoot_list.append(self.shoot_obj)
 
     def on_key_press_second(self):
         if self.disable_movement == 1:
