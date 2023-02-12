@@ -4,6 +4,7 @@ import arcade
 import pyglet
 from source.game_mode import Gamemode,Playermode
 from arcade.examples.sprite_health import IndicatorBar
+from source.shot import Shot
 
 PLAYER_HEALTH = 100
 PLAYER_ENERGY = 100
@@ -23,7 +24,7 @@ def load_texture_pair(filename):
 
 
 class Player(arcade.Sprite):
-    def __init__(self, x, y, sound_manager, mode=1):
+    def __init__(self, x, y, sound_manager, scene ,mode=1):
         super().__init__()
         self.sound_manager = sound_manager
 
@@ -38,6 +39,7 @@ class Player(arcade.Sprite):
         self.speed = 4
         self.score = 0
         self.jump_height = 10
+        self.shot_damage = 20
 
         self.hasFireShoot = False
         self.hasBombShoot = False
@@ -58,7 +60,9 @@ class Player(arcade.Sprite):
         self.key_right_pressed = False
         self.key_shot_pressed = False
         self.player_mode = mode
-
+        self.shoot_list = []
+        self.shoot_obj = None
+        self.scene = scene
         # 0 == no
         # 1 == yes
         self.getHit = 0
@@ -145,6 +149,8 @@ class Player(arcade.Sprite):
         self.texture = self.walk_textures[0][self.facing_direction]
 
     def on_update(self, delta_time):
+        for shot in self.shoot_list:
+            shot.physics_engine.update()
         self.physics_engine.update()
         self.update_energy(delta_time)
 
@@ -164,7 +170,6 @@ class Player(arcade.Sprite):
     
     def update(self):
         """ Move the player """
-        print("yes")
         # Move player.
         # Remove these lines if physics engine is moving player.
         if self.player_mode == Playermode.DUO.value:
@@ -188,6 +193,14 @@ class Player(arcade.Sprite):
             self.left = 0
         elif self.right > self.screen_width - 1:
             self.right = self.screen_width - 1
+        
+        for shot in self.shoot_list:
+            if shot.sprite.left < 0:
+                shot.sprite.remove_from_sprite_lists()
+            elif shot.sprite.right > self.screen_width - 1:
+                shot.sprite.remove_from_sprite_lists()
+                self.shoot_list.remove(shot)
+                del shot # not sure if needed
 
     def increase_score(self):
         self.score += 1
@@ -203,12 +216,9 @@ class Player(arcade.Sprite):
             self.cur_texture += 1
             if self.cur_texture > 1:
                 self.cur_texture = 0
-            if self.key_left_pressed:
-                self.texture = self.shoot_texture[self.cur_texture][1]
-            else:
-                self.texture = self.shoot_texture[self.cur_texture][0]
+            self.texture = self.shoot_texture[self.cur_texture][self.facing_direction]
             self.deltaAnimTime = 0
-            return 
+            return
         
         self.cur_texture += 1
 
@@ -264,6 +274,10 @@ class Player(arcade.Sprite):
             self.disable_movement = 0
             self.key_shot_pressed = False
 
+            self.shoot_obj = Shot(self.center_x + 50, self.center_y + 10, -10 if self.facing_direction else 10, 10, self.animShot[0], self.scene)
+            self.shoot_obj.add_sprite_to_physical_engine()
+            self.shoot_list.append(self.shoot_obj)
+
     def on_key_press_second(self):
         if self.disable_movement == 1:
             return
@@ -281,6 +295,12 @@ class Player(arcade.Sprite):
             self.shot = 1
             self.disable_movement = 1
             self.key_shot_pressed = True
+            self.shoot_obj = Shot(self.center_x + 50, self.center_y + 10, -10 if self.facing_direction else 10, 10,
+                        self.animShot[0],
+                                  self.scene)
+            self.shoot_obj.add_sprite_to_physical_engine()
+            self.shoot_list.append(self.shoot_obj)
+
 
     def on_key_release_second(self):
         if self.controller.x == False:
