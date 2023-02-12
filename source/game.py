@@ -53,11 +53,11 @@ class MyGame(arcade.View):
             )
         else:
             self.timer_text = arcade.Text(
-                text="Timeless Mode",
+                text="Fight!",
                 start_x=self.window.width // 2,
                 start_y=self.window.height - 50,
                 color=arcade.color.WHITE,
-                font_size=30,
+                font_size=40,
                 anchor_x="center"
             )
 
