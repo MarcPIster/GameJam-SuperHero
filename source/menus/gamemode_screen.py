@@ -1,5 +1,7 @@
 import arcade
 from source.game import MyGame
+from source.game_mode import Gamemode
+
 
 class GamemodeWindow(arcade.View):
     def __init__(self, sound_manager, current_view, mode):
@@ -44,14 +46,15 @@ class GamemodeWindow(arcade.View):
         )
 
     def on_click_timeless(self, event):
-        game = MyGame(1, self.mode, self.sound_manager)
+        game = MyGame(Gamemode.TIMELESS.value, self.mode, self.sound_manager)
         game.setup()
         self.window.show_view(game)
         print("Timeless", event)
         self.deactivate()
 
     def on_click_time(self, event):
-        game = MyGame(2, self.mode, self.sound_manager)
+        print(Gamemode.TIME.value)
+        game = MyGame(Gamemode.TIME.value, self.mode, self.sound_manager)
         game.setup()
         self.window.show_view(game)
         print("Time", event)

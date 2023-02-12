@@ -24,7 +24,7 @@ class StartWindow(arcade.View):
         self.v_box = arcade.gui.UIBoxLayout()
 
         # Create the buttons
-        start_button = arcade.gui.UIFlatButton(text="Start Game", width=200)
+        start_button = arcade.gui.UIFlatButton(text="Choose Gamemode", width=200)
         self.v_box.add(start_button.with_space_around(bottom=20))
         start_button.on_click = self.on_click_start
 
@@ -63,7 +63,6 @@ class StartWindow(arcade.View):
 
     def deactivate(self):
         self.manager.disable()
-        self.sound_manager.stop_music("maintheme")
 
     def on_draw(self):
         self.clear()

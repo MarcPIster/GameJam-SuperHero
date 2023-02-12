@@ -42,21 +42,31 @@ class MyGame(arcade.View):
         self.gui_camera = arcade.Camera(self.window.width, self.window.height)
         self.total_time = 0.0
         self.countdown_time = 0
-        self.timer_text = arcade.Text(
-            text="00:00:00",
-            start_x=self.window.width // 2,
-            start_y=self.window.height - 50,
-            color=arcade.color.WHITE,
-            font_size=40,
-            anchor_x="center"
-        )
+        if game_mode == Gamemode.TIME:
+            self.timer_text = arcade.Text(
+                text="00:00:00",
+                start_x=self.window.width // 2,
+                start_y=self.window.height - 50,
+                color=arcade.color.WHITE,
+                font_size=40,
+                anchor_x="center"
+            )
+        else:
+            self.timer_text = arcade.Text(
+                text="Fight!",
+                start_x=self.window.width // 2,
+                start_y=self.window.height - 50,
+                color=arcade.color.WHITE,
+                font_size=40,
+                anchor_x="center"
+            )
 
         self.game_mode = game_mode
         self.player_mode = player_mode
         arcade.set_background_color(arcade.csscolor.CORNFLOWER_BLUE)
 
+        # initialize sound manager and add sounds
         self.sound_manager = sound_manager
-
         self.sound_manager.add_sound(f'hit2', f'./assets/sounds/hit2.wav')
         self.sound_manager.add_sound(f'hit', f'./assets/sounds/hit1.wav')
         self.sound_manager.add_sound(f'dead', f'./assets/sounds/diesound.wav')
@@ -257,7 +267,7 @@ class MyGame(arcade.View):
                 self.sound_manager.play_sound('coin-collect')
 
         # update timer
-        if self.game_mode == 2:
+        if self.game_mode == Gamemode.TIME.value:
             self.total_time += delta_time
             time_passed = 120 - self.total_time
             minutes = int(time_passed) // 60
@@ -271,9 +281,7 @@ class MyGame(arcade.View):
                 if self.countdown_time >= 1:
                     self.sound_manager.play_sound('beep')
                     self.countdown_time = 0
-        else:
-            self.timer_text.text = "FIGHT!"
-
+        
         for player in self.player_list:
             # check item collision
             player_collision_list = arcade.check_for_collision_with_lists(player, [
