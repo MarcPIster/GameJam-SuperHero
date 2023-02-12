@@ -6,5 +6,5 @@ class Playermode(Enum):
 
 class Gamemode(Enum):
     TIME = 1
-    DEATHMATCH = 2
+    TIMELESS = 2
     
