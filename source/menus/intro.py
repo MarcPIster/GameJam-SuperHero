@@ -135,11 +135,15 @@ class Intro:
 
             if self.current_sprite_index_player > 4:
                 self.current_sprite_index_player = 0
-            if self.player_movement[0] < 0:
-                self.player_anim_list = ["./assets/intro/left/run1.png", "./assets/intro/left/run2.png", "./assets/intro/left/run3.png",
-                                         "./assets/intro/left/run4.png", "./assets/intro/left/run5.png"]
-            else:
-                self.player_anim_list = ["./assets/intro/right/run1.png", "./assets/intro/right/run2.png", "./assets/intro/right/run3.png",
-                                         "./assets/intro/right/run4.png", "./assets/intro/right/run5.png"]
 
-            self.player.texture = arcade.load_texture(self.player_anim_list[self.current_sprite_index_player])
+            if self.hit:
+                pass
+            else:
+                if self.player_movement[0] < 0:
+                    self.player_anim_list = ["./assets/intro/left/run1.png", "./assets/intro/left/run2.png", "./assets/intro/left/run3.png",
+                                             "./assets/intro/left/run4.png", "./assets/intro/left/run5.png"]
+                else:
+                    self.player_anim_list = ["./assets/intro/right/run1.png", "./assets/intro/right/run2.png", "./assets/intro/right/run3.png",
+                                             "./assets/intro/right/run4.png", "./assets/intro/right/run5.png"]
+
+                self.player.texture = arcade.load_texture(self.player_anim_list[self.current_sprite_index_player])
