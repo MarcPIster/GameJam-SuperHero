@@ -2,12 +2,14 @@ import arcade
 
 
 class Shot:
-    def __init__(self, x, y, speed, damage, sprite, scene):
+    def __init__(self, x, y, speed, jumpiness, damage, sprite, scene, scale=1.5):
         self.damage = damage
         self.sprite = arcade.Sprite(sprite, 1.5)
+        self.sprite.scale = scale
         self.sprite.center_x = x
         self.sprite.center_y = y
         self.sprite.change_x = speed
+        self.sprite.change_y = jumpiness
         self.speed = speed
         self.physics_engine = None
         self.scene = scene
