@@ -137,7 +137,14 @@ class Intro:
                 self.current_sprite_index_player = 0
 
             if self.hit:
-                pass
+                flipped = False
+                self.player_anim_list = ["./assets/enemy/walk/walk1.png", "./assets/enemy/walk/walk2.png",
+                                         "./assets/enemy/walk/walk3.png",
+                                         "./assets/enemy/walk/walk4.png", "./assets/enemy/walk/walk5.png"]
+                if self.player_movement[0] < 0:
+                    flipped = True
+                self.player.texture = arcade.load_texture(self.player_anim_list[self.current_sprite_index_player], flipped_horizontally=flipped)
+
             else:
                 if self.player_movement[0] < 0:
                     self.player_anim_list = ["./assets/intro/left/run1.png", "./assets/intro/left/run2.png", "./assets/intro/left/run3.png",
