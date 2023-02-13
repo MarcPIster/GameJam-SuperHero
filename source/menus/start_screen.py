@@ -17,7 +17,7 @@ class StartWindow(arcade.View):
         self.sound_manager = sound_manager.get_sound_manager()
         self.sound_manager.add_music("maintheme", "./assets/sounds/theme.wav")
         self.sound_manager.play_music("maintheme")
-        self.intro = Intro()
+        self.intro = Intro(self.sound_manager)
 
         # Set background color
         arcade.set_background_color(arcade.color.DARK_BLUE_GRAY)
