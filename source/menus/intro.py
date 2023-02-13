@@ -22,11 +22,11 @@ class Intro:
 
 
             self.anim_time_player = 0
-            self.player = arcade.Sprite("./assets/intro/run1.png", 1)
+            self.player = arcade.Sprite("./assets/intro/right/run1.png", 1)
             self.player.center_x = 500
             self.player.center_y = 100
-            self.player_anim_list = ["./assets/intro/run1.png", "./assets/intro/run2.png", "./assets/intro/run3.png",
-                                     "./assets/intro/run4.png", "./assets/intro/run5.png"]
+            self.player_anim_list = ["./assets/intro/right/run1.png", "./assets/intro/right/run2.png", "./assets/intro/right/run3.png",
+                                     "./assets/intro/right/run4.png", "./assets/intro/right/run5.png"]
 
             self.physics_engine_player = arcade.PhysicsEnginePlatformer(self.player, walls=[arcade.Sprite("./assets/player/walk/walk0.png", 2)])
             self.player_movement = [0, 0]
@@ -89,6 +89,8 @@ class Intro:
             self.player.change_x = self.player_movement[0]
             self.player.change_y = self.player_movement[1]
             self.player.update()
+            self.player_animation(delta_time)
+
             self.check_player_collision()
 
         def check_player_collision(self):
@@ -119,4 +121,25 @@ class Intro:
             else:
                 self.bat_anim_list = ["./assets/bat/right/right0.png", "./assets/bat/right/right1.png",
                                       "./assets/bat/right/right2.png"]
+
             self.bat.texture = arcade.load_texture(self.bat_anim_list[self.current_bat_animation])
+
+
+        def player_animation(self, delta_time):
+            self.anim_time_player += delta_time
+            if self.anim_time_player < 0.16:
+                return
+
+            self.anim_time_player = 0
+            self.current_sprite_index_player += 1
+
+            if self.current_sprite_index_player > 4:
+                self.current_sprite_index_player = 0
+            if self.player_movement[0] < 0:
+                self.player_anim_list = ["./assets/intro/left/run1.png", "./assets/intro/left/run2.png", "./assets/intro/left/run3.png",
+                                         "./assets/intro/left/run4.png", "./assets/intro/left/run5.png"]
+            else:
+                self.player_anim_list = ["./assets/intro/right/run1.png", "./assets/intro/right/run2.png", "./assets/intro/right/run3.png",
+                                         "./assets/intro/right/run4.png", "./assets/intro/right/run5.png"]
+
+            self.player.texture = arcade.load_texture(self.player_anim_list[self.current_sprite_index_player])
