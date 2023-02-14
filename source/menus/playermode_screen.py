@@ -8,6 +8,7 @@ class PlayermodeWindow(arcade.View):
         super().__init__()
         self.open_view = current_view
         self.sound_manager = sound_manager
+        self.intro = current_view.intro
 
         # --- Required for all code that uses UI element,
         # a UIManager to handle the UI.
@@ -82,3 +83,7 @@ class PlayermodeWindow(arcade.View):
     def on_draw(self):
         self.clear()
         self.manager.draw()
+        self.intro.on_draw()
+
+    def on_update(self, delta_time):
+        self.intro.on_update(delta_time)

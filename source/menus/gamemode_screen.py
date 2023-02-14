@@ -9,6 +9,7 @@ class GamemodeWindow(arcade.View):
         self.open_view = current_view
         self.sound_manager = sound_manager
         self.mode = mode
+        self.intro = current_view.intro
 
         # --- Required for all code that uses UI element,
         # a UIManager to handle the UI.
@@ -46,6 +47,7 @@ class GamemodeWindow(arcade.View):
         )
 
     def on_click_timeless(self, event):
+        self.intro.end_intro()
         game = MyGame(Gamemode.TIMELESS.value, self.mode, self.sound_manager)
         game.setup()
         self.window.show_view(game)
@@ -54,6 +56,7 @@ class GamemodeWindow(arcade.View):
 
     def on_click_time(self, event):
         print(Gamemode.TIME.value)
+        self.intro.end_intro()
         game = MyGame(Gamemode.TIME.value, self.mode, self.sound_manager)
         game.setup()
         self.window.show_view(game)
@@ -75,4 +78,8 @@ class GamemodeWindow(arcade.View):
     def on_draw(self):
         self.clear()
         self.manager.draw()
+        self.intro.on_draw()
+
+    def on_update(self, delta_time):
+        self.intro.on_update(delta_time)
 

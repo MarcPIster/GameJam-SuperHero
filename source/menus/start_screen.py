@@ -1,13 +1,11 @@
 import arcade
 import arcade.gui
-from source.game import MyGame
 from source.menus.playermode_screen import PlayermodeWindow
 from source.menus.setting_screen import SettingsWindow
-from source.menus.intro import Intro
 
 
 class StartWindow(arcade.View):
-    def __init__(self, sound_manager):
+    def __init__(self, sound_manager, intro):
         super().__init__()
 
         # --- Required for all code that uses UI element,
@@ -17,7 +15,7 @@ class StartWindow(arcade.View):
         self.sound_manager = sound_manager.get_sound_manager()
         self.sound_manager.add_music("maintheme", "./assets/sounds/theme.wav")
         self.sound_manager.play_music("maintheme")
-        self.intro = Intro(self.sound_manager)
+        self.intro = intro
 
         # Set background color
         arcade.set_background_color(arcade.color.DARK_BLUE_GRAY)

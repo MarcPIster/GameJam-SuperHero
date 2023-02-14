@@ -154,3 +154,9 @@ class Intro:
                                              "./assets/intro/right/run4.png", "./assets/intro/right/run5.png"]
 
                 self.player.texture = arcade.load_texture(self.player_anim_list[self.current_sprite_index_player])
+
+
+
+        def end_intro(self):
+            self.player.kill()
+
